@@ -61,6 +61,7 @@ npm run dev
 
 Acesse em: http://localhost:3000
 
+---
 
 ## 📊 Visualizações e Relatórios
 
@@ -86,6 +87,7 @@ Acesse em: http://localhost:3000
 
  Busca e filtro por descrição, valor ou pessoa.
 
+---
 
 ##👤 Autor
 Desenvolvido por Cláudio Faustino
