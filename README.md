@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💼 Meu Controle Financeiro
 
-## Getting Started
+**Meu Controle Financeiro** é uma aplicação web desenvolvida com React e TypeScript que permite o gerenciamento simples e eficiente de receitas e despesas mensais. É ideal para uso pessoal, familiar ou compartilhado entre grupos de pessoas.
 
-First, run the development server:
+---
+
+## 📚 Visão Geral
+
+- 🔎 **Filtros por mês e ano** para controle detalhado dos lançamentos.
+- 👥 **Gerenciamento de pessoas** associadas a cada entrada financeira.
+- 💰 **Classificação por tipo**: receita, despesa fixa e despesa variável.
+- ♻️ **Despesas fixas recorrentes** com controle de meses repetidos.
+- 📈 **Resumo geral e individual por pessoa** (receitas, despesas e saldo).
+- 💾 **Persistência local** com `localStorage` (sem necessidade de backend).
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+| Tecnologia     | Descrição                              |
+|----------------|------------------------------------------|
+| [React](https://reactjs.org/)       | Biblioteca para construção da interface     |
+| [TypeScript](https://www.typescriptlang.org/) | Tipagem estática e segurança de código      |
+| [Tailwind CSS](https://tailwindcss.com/)     | Framework utilitário para estilização rápida |
+| [React Icons](https://react-icons.github.io/react-icons/) | Ícones vetoriais modernos                    |
+| `localStorage` | Armazenamento persistente no navegador  |
+
+---
+
+## 📂 Estrutura do Projeto
+
+📦 meu-controle-financeiro/
+├── components/
+│ ├── EntryForm.tsx # Formulário de lançamento
+│ ├── EntryTable.tsx # Tabela com listagem
+│ ├── Modal.tsx # Componente modal reutilizável
+│ ├── PersonManager.tsx # Gerenciador de pessoas
+│ └── Summary.tsx # Resumo financeiro do mês
+├── types/
+│ ├── Entry.ts # Tipagem para entradas financeiras
+│ └── person.ts # Tipagem para pessoas
+├── App.tsx # Arquivo principal com toda a lógica
+├── globals.css # Estilização global com Tailwind
+
+---
+
+## ▶️ Como Executar Localmente
 
 ```bash
+# Clone o repositório
+git clone https://github.com/fclaudio051/meu-controle-financeiro.git
+
+# Acesse o diretório
+cd meu-controle-financeiro
+
+# Instale as dependências
+npm install
+
+# Inicie o servidor de desenvolvimento
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse em: http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📊 Visualizações e Relatórios
 
-## Learn More
+ Dashboard com gráficos interativos (ex: Pie, Bar, Line) usando Recharts ou Chart.js.
 
-To learn more about Next.js, take a look at the following resources:
+ Resumo anual/mensal consolidado para análise de tendências.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+ Exportação para PDF, Excel ou CSV de todos os lançamentos.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+☁️ Integrações e Backend
+ Autenticação de usuários (via Firebase Auth ou Auth.js).
 
-## Deploy on Vercel
+ Armazenamento em nuvem com Firestore ou Supabase, mantendo dados sincronizados entre dispositivos.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+ API REST ou GraphQL para persistência robusta.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+📱 Experiência do Usuário (UX)
+ Modo escuro com toggle automático/manual.
+
+ Responsividade aprimorada para mobile e tablets.
+
+ Sistema de categorias personalizáveis (alimentação, transporte, lazer etc.).
+
+ Busca e filtro por descrição, valor ou pessoa.
+
+
+##👤 Autor
+Desenvolvido por Cláudio Faustino
