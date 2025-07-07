@@ -5,7 +5,7 @@ export interface FinanceEntry {
     type: EntryType;
     description: string;
     person: string; 
-    date: Date;
+    date: string;
     value: number;
     category?: string; 
     createdAt?: Date;
