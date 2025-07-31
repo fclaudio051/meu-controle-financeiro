@@ -25,19 +25,21 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
   return createPortal(
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm transition-opacity duration-300"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md transition-all duration-300 p-4"
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="bg-white rounded-xl shadow-lg p-6 w-full max-w-xl relative animate-fadeIn"
+        className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 w-full max-w-4xl relative transform transition-all duration-300 animate-in slide-in-from-bottom-4 fade-in-0"
       >
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 transition"
+          className="absolute top-6 right-6 w-10 h-10 bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110 hover:shadow-lg z-10"
         >
-          <FaTimes size={20} />
+          <FaTimes size={16} />
         </button>
-        {children}
+        <div className="max-h-[90vh] overflow-y-auto">
+          {children}
+        </div>
       </div>
     </div>,
     document.body

@@ -99,28 +99,35 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 py-8 px-4">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Meu Controle Financeiro</h1>
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
+            Meu Controle Financeiro
+          </h1>
+          <p className="text-lg text-gray-600 font-medium">Gerencie suas finanças com estilo e simplicidade</p>
+        </div>
 
-        <div className="flex flex-wrap gap-4 mb-6">
+        <div className="flex flex-wrap gap-4 mb-8 justify-center">
           <button
             onClick={() => {
               setEditingEntry(null);
               setShowForm(!showForm);
             }}
-            className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
-              showForm ? 'bg-red-600 hover:bg-red-800' : 'bg-green-600 hover:bg-green-800'
+            className={`px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold ${
+              showForm 
+                ? 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600' 
+                : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600'
             } text-white`}
           >
             {showForm ? (
               <>
-                <FaTimes />
+                <FaTimes className="text-lg" />
                 <span>Fechar Formulário</span>
               </>
             ) : (
               <>
-                <FaPlus />
+                <FaPlus className="text-lg" />
                 <span>Adicionar Lançamento</span>
               </>
             )}
@@ -128,17 +135,17 @@ function App() {
 
           <button
             onClick={() => setShowPersonManager(true)}
-            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-800 text-white flex items-center gap-2"
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white flex items-center gap-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 font-semibold"
           >
-            <FaUserFriends />
+            <FaUserFriends className="text-lg" />
             Gerenciar Pessoas
           </button>
 
           <button
             onClick={() => setShowResumo(true)}
-            className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-800 text-white flex items-center gap-2"
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white flex items-center gap-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 font-semibold"
           >
-            <FaChartPie />
+            <FaChartPie className="text-lg" />
             Resumo por Pessoa
           </button>
         </div>
@@ -155,26 +162,32 @@ function App() {
           </Modal>
 
           <div className="lg:col-span-3">
-            <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Filtros</h2>
-              <div className="flex items-center space-x-4">
-                <select
-                  value={month}
-                  onChange={e => setMonth(parseInt(e.target.value))}
-                  className="p-2 border border-gray-300 rounded"
-                >
-                  {monthNames.map((name, index) => (
-                    <option key={index} value={index}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  value={year}
-                  onChange={e => setYear(parseInt(e.target.value))}
-                  className="p-2 border border-gray-300 rounded"
-                />
+            <div className="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/20 mb-8">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent mb-6">Filtros</h2>
+              <div className="flex items-center space-x-6">
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-gray-600">Mês</label>
+                  <select
+                    value={month}
+                    onChange={e => setMonth(parseInt(e.target.value))}
+                    className="p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium"
+                  >
+                    {monthNames.map((name, index) => (
+                      <option key={index} value={index}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-gray-600">Ano</label>
+                  <input
+                    type="number"
+                    value={year}
+                    onChange={e => setYear(parseInt(e.target.value))}
+                    className="p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium"
+                  />
+                </div>
               </div>
             </div>
 
@@ -195,38 +208,40 @@ function App() {
       </Modal>
 
       <Modal isOpen={showResumo} onClose={() => setShowResumo(false)}>
-        <div>
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Resumo por Pessoa</h2>
-          <table className="w-full text-left border-collapse mt-2">
-            <thead>
-              <tr>
-                <th className="py-2 px-3 border-b font-medium">Pessoa</th>
-                <th className="py-2 px-3 border-b font-medium text-green-700">Receitas</th>
-                <th className="py-2 px-3 border-b font-medium text-red-700">Despesas</th>
-                <th className="py-2 px-3 border-b font-medium">Saldo</th>
-              </tr>
-            </thead>
-            <tbody className="text-gray-700">
-              {Object.entries(resumoPorPessoa).map(([personId, { receita, despesa }]) => {
-                const saldo = receita - despesa;
-                const label = peopleMap[personId] || 'Desconhecido';
-                return (
-                  <tr key={personId}>
-                    <td className="py-2 px-3 border-b">{label}</td>
-                    <td className="py-2 px-3 border-b text-green-600">R$ {receita.toFixed(2)}</td>
-                    <td className="py-2 px-3 border-b text-red-600">R$ {despesa.toFixed(2)}</td>
-                    <td
-                      className={`py-2 px-3 border-b ${
-                        saldo >= 0 ? 'text-green-700' : 'text-red-700'
-                      }`}
-                    >
-                      R$ {saldo.toFixed(2)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="p-6">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-8 text-center">Resumo por Pessoa</h2>
+          <div className="overflow-hidden rounded-2xl shadow-2xl border border-gray-100">
+            <table className="w-full text-left">
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                <tr>
+                  <th className="py-4 px-6 font-bold text-gray-700 text-sm uppercase tracking-wider">Pessoa</th>
+                  <th className="py-4 px-6 font-bold text-emerald-700 text-sm uppercase tracking-wider">Receitas</th>
+                  <th className="py-4 px-6 font-bold text-red-600 text-sm uppercase tracking-wider">Despesas</th>
+                  <th className="py-4 px-6 font-bold text-gray-700 text-sm uppercase tracking-wider">Saldo</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {Object.entries(resumoPorPessoa).map(([personId, { receita, despesa }]) => {
+                  const saldo = receita - despesa;
+                  const label = peopleMap[personId] || 'Desconhecido';
+                  return (
+                    <tr key={personId} className="hover:bg-gray-50/70 transition-colors duration-200">
+                      <td className="py-4 px-6 font-semibold text-gray-800">{label}</td>
+                      <td className="py-4 px-6 font-bold text-emerald-600">R$ {receita.toFixed(2)}</td>
+                      <td className="py-4 px-6 font-bold text-red-500">R$ {despesa.toFixed(2)}</td>
+                      <td
+                        className={`py-4 px-6 font-bold ${
+                          saldo >= 0 ? 'text-emerald-600' : 'text-red-500'
+                        }`}
+                      >
+                        R$ {saldo.toFixed(2)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </Modal>
     </div>

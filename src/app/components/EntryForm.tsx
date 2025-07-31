@@ -87,34 +87,34 @@ export function EntryForm({ onAdd, visible, onClose, people, initialEntry }: Pro
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto w-full"
+      className="bg-gradient-to-br from-white/90 to-gray-50/90 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-white/20 max-w-2xl mx-auto w-full"
     >
-      <h3 className="text-xl font-bold text-gray-800 mb-4">
+      <h3 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-8 text-center">
         {initialEntry ? 'Editar Lançamento' : 'Adicionar Lançamento'}
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tipo:</label>
+          <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Tipo:</label>
           <select
             value={entry.type}
             onChange={e => setEntry({ ...entry, type: e.target.value as EntryType })}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm"
           >
-            <option value="receita">Receita</option>
-            <option value="despesa_fixa">Despesa Fixa</option>
-            <option value="despesa_variavel">Despesa Variável</option>
+            <option value="receita">💰 Receita</option>
+            <option value="despesa_fixa">🔒 Despesa Fixa</option>
+            <option value="despesa_variavel">📊 Despesa Variável</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Pessoa:</label>
+          <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Pessoa:</label>
           <select
             value={entry.person}
             onChange={e => setEntry({ ...entry, person: e.target.value })}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm"
           >
-            <option value="">Selecione uma pessoa</option>
+            <option value="">👤 Selecione uma pessoa</option>
             {people.map(p => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -124,17 +124,17 @@ export function EntryForm({ onAdd, visible, onClose, people, initialEntry }: Pro
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Data:</label>
+          <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Data:</label>
           <input
             type="date"
             value={entry.date}
             onChange={e => setEntry({ ...entry, date: e.target.value })}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Valor:</label>
+          <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Valor:</label>
           <input
             type="number"
             step="0.01"
@@ -143,15 +143,15 @@ export function EntryForm({ onAdd, visible, onClose, people, initialEntry }: Pro
               const value = e.target.value;
               setEntry({ ...entry, value: value === '' ? 0 : parseFloat(value) });
             }}
-            className="w-full p-2 border border-gray-300 rounded"
-            placeholder="0,00"
+            className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm"
+            placeholder="💰 0,00"
           />
         </div>
 
         {entry.type === 'despesa_fixa' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Repetir por quantos meses?
+            <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
+              🔄 Repetir por quantos meses?
             </label>
             <input
               type="number"
@@ -161,47 +161,47 @@ export function EntryForm({ onAdd, visible, onClose, people, initialEntry }: Pro
                 const value = e.target.value;
                 setRepeatMonth(value === '' ? 1 : parseInt(value));
               }}
-              className="w-full p-2 border border-gray-300 rounded"
-              placeholder="Ex: 3"
+              className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm"
+              placeholder="Ex: 3 meses"
             />
           </div>
         )}
 
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Descrição:</label>
+          <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Descrição:</label>
           <input
             type="text"
             value={entry.description}
             onChange={e => setEntry({ ...entry, description: e.target.value })}
-            className="w-full p-2 border border-gray-300 rounded"
-            placeholder="Descrição do lançamento"
+            className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm"
+            placeholder="📝 Descrição do lançamento"
           />
         </div>
       </div>
 
-      <div className="flex gap-2 mt-6">
+      <div className="flex gap-4 mt-8">
         {initialEntry ? (
           <>
             <button
               type="submit"
-              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded"
+              className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-4 px-6 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
             >
-              Atualizar
+              ✏️ Atualizar
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded"
+              className="flex-1 bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white py-4 px-6 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
             >
-              Cancelar
+              ❌ Cancelar
             </button>
           </>
         ) : (
           <button
             type="submit"
-            className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded"
+            className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-4 px-6 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
           >
-            Adicionar
+            ➕ Adicionar Lançamento
           </button>
         )}
       </div>
