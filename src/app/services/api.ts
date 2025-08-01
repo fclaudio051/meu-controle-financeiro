@@ -2,7 +2,10 @@ import { User } from '../types/User';
 import { Person } from '../types/person';
 import { FinanceEntry } from '../types/Entry';
 
-const API_BASE_URL = 'http://localhost:3001/api';
+// --- MODIFICAÇÃO PRINCIPAL AQUI ---
+// Use a variável de ambiente VITE_API_URL, com um fallback para localhost para desenvolvimento.
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+// --- FIM DA MODIFICAÇÃO ---
 
 interface ApiResponse<T> {
   success: boolean;
