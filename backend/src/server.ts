@@ -48,9 +48,9 @@ app.get('/api/health', (req, res) => {
 });
 
 // Rotas da API
-app.use('/api/auth', authRoutes);
-app.use('/api/people', peopleRoutes);
-app.use('/api/entries', entriesRoutes);
+app.use('/auth', authRoutes);
+app.use('/people', peopleRoutes);
+app.use('/entries', entriesRoutes);
 
 // Altera a linha de app.listen para incluir o HOST e logs de debug.
 app.listen(PORT, HOST, () => {
