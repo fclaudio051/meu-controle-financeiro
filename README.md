@@ -1,94 +1,170 @@
-# 💼 Meu Controle Financeiro
+# 💰 Meu Controle Financeiro
 
-**Meu Controle Financeiro** é uma aplicação web desenvolvida com React e TypeScript que permite o gerenciamento simples e eficiente de receitas e despesas mensais. É ideal para uso pessoal, familiar ou compartilhado entre grupos de pessoas.
+Sistema completo de controle financeiro pessoal com interface moderna e backend robusto.
 
----
+## 🚀 Tecnologias
 
-## 📚 Visão Geral
+### Frontend
+- **Next.js 15** - Framework React
+- **TypeScript** - Tipagem estática
+- **Tailwind CSS** - Estilização moderna
+- **React Icons** - Ícones
+- **Glassmorphism** - Design moderno
 
-- 🔎 **Filtros por mês e ano** para controle detalhado dos lançamentos.
-- 👥 **Gerenciamento de pessoas** associadas a cada entrada financeira.
-- 💰 **Classificação por tipo**: receita, despesa fixa e despesa variável.
-- ♻️ **Despesas fixas recorrentes** com controle de meses repetidos.
-- 📈 **Resumo geral e individual por pessoa** (receitas, despesas e saldo).
-- 💾 **Persistência local** com `localStorage` (sem necessidade de backend).
+### Backend
+- **Node.js** - Runtime JavaScript
+- **Express** - Framework web
+- **TypeScript** - Tipagem estática
+- **JWT** - Autenticação
+- **bcryptjs** - Hash de senhas
+- **JSON File Database** - Armazenamento persistente
 
----
+## 🎨 Features
 
-## 🛠️ Tecnologias Utilizadas
+### ✨ Interface Moderna
+- Design system com gradientes e glassmorphism
+- Animações suaves e hover effects
+- Layout responsivo
+- Tema consistente em cores (indigo/purple)
 
-| Tecnologia     | Descrição                              |
-|----------------|------------------------------------------|
-| [React](https://reactjs.org/)       | Biblioteca para construção da interface     |
-| [TypeScript](https://www.typescriptlang.org/) | Tipagem estática e segurança de código      |
-| [Tailwind CSS](https://tailwindcss.com/)     | Framework utilitário para estilização rápida |
-| [React Icons](https://react-icons.github.io/react-icons/) | Ícones vetoriais modernos                    |
-| `localStorage` | Armazenamento persistente no navegador  |
+### 🔐 Sistema de Autenticação
+- Login/Registro de usuários
+- Proteção de rotas
+- Sessões persistentes
+- Logout seguro
 
----
+### 💸 Gestão Financeira
+- **Receitas, Despesas Fixas e Variáveis**
+- **Validação de valores positivos**
+- **Filtros por mês/ano**
+- **Resumo financeiro com gráficos**
+- **Gerenciamento de pessoas**
 
-## 📂 Estrutura do Projeto
+### 🛡️ Validações
+- Valores não podem ser negativos
+- Campos obrigatórios
+- Validação de email
+- Senhas seguras
 
-📦 meu-controle-financeiro/
-├── components/
-│ ├── EntryForm.tsx # Formulário de lançamento
-│ ├── EntryTable.tsx # Tabela com listagem
-│ ├── Modal.tsx # Componente modal reutilizável
-│ ├── PersonManager.tsx # Gerenciador de pessoas
-│ └── Summary.tsx # Resumo financeiro do mês
-├── types/
-│ ├── Entry.ts # Tipagem para entradas financeiras
-│ └── person.ts # Tipagem para pessoas
-├── App.tsx # Arquivo principal com toda a lógica
-├── globals.css # Estilização global com Tailwind
+## 🚀 Como Executar
 
----
-
-## ▶️ Como Executar Localmente
-
-```bash
-# Clone o repositório
-git clone https://github.com/fclaudio051/meu-controle-financeiro.git
-
-# Acesse o diretório
+### 1. Clonar o Repositório
+\`\`\`bash
+git clone [url-do-repo]
 cd meu-controle-financeiro
+\`\`\`
 
-# Instale as dependências
+### 2. Configurar Backend
+\`\`\`bash
+cd backend
 npm install
-
-# Inicie o servidor de desenvolvimento
 npm run dev
+\`\`\`
+O servidor estará rodando em: http://localhost:3001
 
-Acesse em: http://localhost:3000
+### 3. Configurar Frontend
+\`\`\`bash
+# Em outro terminal, na raiz do projeto
+npm install
+npm run dev
+\`\`\`
+A aplicação estará rodando em: http://localhost:3000
 
-```
+## 🔧 Scripts Disponíveis
+
+### Frontend
+- \`npm run dev\` - Executar em modo desenvolvimento
+- \`npm run build\` - Build para produção
+- \`npm run start\` - Executar build de produção
+
+### Backend
+- \`npm run dev\` - Executar em modo desenvolvimento
+- \`npm run build\` - Compilar TypeScript
+- \`npm run start\` - Executar versão compilada
+
+## 📡 API Endpoints
+
+### Autenticação
+- \`POST /api/auth/register\` - Registrar usuário
+- \`POST /api/auth/login\` - Login
+- \`GET /api/auth/me\` - Verificar token
+
+### Pessoas
+- \`GET /api/people\` - Listar pessoas
+- \`POST /api/people\` - Criar pessoa
+- \`DELETE /api/people/:id\` - Deletar pessoa
+
+### Entradas Financeiras
+- \`GET /api/entries\` - Listar entradas
+- \`POST /api/entries\` - Criar entrada
+- \`PUT /api/entries/:id\` - Atualizar entrada
+- \`DELETE /api/entries/:id\` - Deletar entrada
+
+## 💾 Banco de Dados
+
+O sistema usa arquivos JSON para persistência:
+- \`backend/data/database.json\` - Dados principais
+- Estrutura: users, people, entries
+- Backup automático em cada operação
+
+## 🔒 Segurança
+
+- Senhas hasheadas com bcrypt
+- JWT para autenticação
+- Middleware de autorização
+- Validação de dados
+- CORS configurado
+
+## 🎨 Design System
+
+### Cores Principais
+- **Gradiente Principal**: Indigo → Purple
+- **Receitas**: Emerald → Teal
+- **Despesas**: Red → Pink
+- **Neutros**: Gray shades
+
+### Componentes
+- Cards com glassmorphism
+- Botões com gradientes
+- Inputs com focus rings
+- Modais modernos
+- Tabelas responsivas
+
+## 📱 Responsividade
+
+- Mobile First
+- Breakpoints: sm, md, lg, xl
+- Grid system flexível
+- Componentes adaptativos
+
+## 🚀 Deploy
+
+### Frontend (Vercel)
+\`\`\`bash
+npm run build
+# Deploy para Vercel
+\`\`\`
+
+### Backend (Railway/Heroku)
+\`\`\`bash
+cd backend
+npm run build
+# Configurar variáveis de ambiente
+# Deploy para plataforma escolhida
+\`\`\`
+
+## 🤝 Contribuição
+
+1. Fork o projeto
+2. Crie uma branch (\`git checkout -b feature/nova-feature\`)
+3. Commit (\`git commit -m 'Adicionar nova feature'\`)
+4. Push (\`git push origin feature/nova-feature\`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT.
+
 ---
 
-## 📊 Visualizações e Relatórios
-
- Dashboard com gráficos interativos (ex: Pie, Bar, Line) usando Recharts ou Chart.js.
-
- Resumo anual/mensal consolidado para análise de tendências.
-
- Exportação para PDF, Excel ou CSV de todos os lançamentos.
-
-☁️ Integrações e Backend
- Autenticação de usuários (via Firebase Auth ou Auth.js).
-
- Armazenamento em nuvem com Firestore ou Supabase, mantendo dados sincronizados entre dispositivos.
-
- API REST ou GraphQL para persistência robusta.
-
-📱 Experiência do Usuário (UX)
- Modo escuro com toggle automático/manual.
-
- Responsividade aprimorada para mobile e tablets.
-
- Sistema de categorias personalizáveis (alimentação, transporte, lazer etc.).
-
- Busca e filtro por descrição, valor ou pessoa.
-
---- 
-
-## 👤Autor
-Desenvolvido por Cláudio Faustino
+**Desenvolvido com ❤️ e muito ☕**

@@ -7,10 +7,15 @@ import { Person } from './types/person';
 import { Summary } from './components/Summary';
 import { EntryForm } from './components/EntryForm';
 import { EntryTable } from './components/EntryTable';
-import { PersonManager } from './components/personManager';
+import { PersonManagerWithAPI } from './components/PersonManagerWithAPI';
 import { Modal } from './components/Modal';
+import { AuthProvider } from './contexts/AuthContext';
+import { AuthGuard } from './components/AuthGuard';
+import { Login } from './components/Login';
+import { Header } from './components/Header';
 
 import { FaPlus, FaTimes, FaUserFriends, FaChartPie } from 'react-icons/fa';
+import { apiService } from './services/api';
 
 import './globals.css';
 
@@ -19,7 +24,7 @@ const monthNames = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
 ];
 
-function App() {
+function FinancialApp() {
   const [entries, setEntries] = useState<FinanceEntry[]>([]);
   const [people, setPeople] = useState<Person[]>([]);
   const [editingEntry, setEditingEntry] = useState<FinanceEntry | null>(null);
@@ -30,22 +35,59 @@ function App() {
 
   const [month, setMonth] = useState<number>(new Date().getMonth());
   const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [loading, setLoading] = useState(true);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      
+      // Tentar carregar da API primeiro
+      const [peopleResponse, entriesResponse] = await Promise.all([
+        apiService.getPeople(),
+        apiService.getEntries()
+      ]);
+
+      if (peopleResponse.success && peopleResponse.data) {
+        setPeople(peopleResponse.data);
+        // Salvar no localStorage como backup
+        localStorage.setItem('offline_people', JSON.stringify(peopleResponse.data));
+      } else {
+        // Fallback para localStorage se API não funcionar
+        console.log('API indisponível, carregando dados locais...');
+        const localPeople = localStorage.getItem('offline_people');
+        if (localPeople) {
+          setPeople(JSON.parse(localPeople));
+        }
+      }
+
+      if (entriesResponse.success && entriesResponse.data) {
+        setEntries(entriesResponse.data);
+        // Salvar no localStorage como backup
+        localStorage.setItem('offline_entries', JSON.stringify(entriesResponse.data));
+      } else {
+        // Fallback para localStorage se API não funcionar
+        const localEntries = localStorage.getItem('offline_entries');
+        if (localEntries) {
+          setEntries(JSON.parse(localEntries));
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      
+      // Fallback completo para dados locais
+      const localPeople = localStorage.getItem('offline_people');
+      const localEntries = localStorage.getItem('offline_entries');
+      
+      if (localPeople) setPeople(JSON.parse(localPeople));
+      if (localEntries) setEntries(JSON.parse(localEntries));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const storedEntries = localStorage.getItem('financeEntries');
-    const storedPeople = localStorage.getItem('people');
-
-    if (storedEntries) setEntries(JSON.parse(storedEntries));
-    if (storedPeople) setPeople(JSON.parse(storedPeople));
+    loadData();
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem('financeEntries', JSON.stringify(entries));
-  }, [entries]);
-
-  useEffect(() => {
-    localStorage.setItem('people', JSON.stringify(people));
-  }, [people]);
 
   const peopleMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -74,14 +116,48 @@ function App() {
     return base;
   }, [filteredEntries]);
 
-  const handleAddEntry = (entry: FinanceEntry) => {
-    if (editingEntry) {
-      setEntries(prev => prev.map(e => (e.id === entry.id ? entry : e)));
-    } else {
-      setEntries(prev => [...prev, entry]);
+  const handleAddEntry = async (entry: FinanceEntry) => {
+    try {
+      if (editingEntry) {
+        // Atualizar entrada existente
+        const response = await apiService.updateEntry(entry.id, {
+          type: entry.type,
+          person: entry.person,
+          date: entry.date,
+          value: entry.value,
+          description: entry.description
+        });
+
+        if (response.success) {
+          setEntries(prev => prev.map(e => (e.id === entry.id ? response.data!.entry : e)));
+        } else {
+          alert(response.error || 'Erro ao atualizar entrada');
+          return;
+        }
+      } else {
+        // Criar nova entrada
+        const response = await apiService.createEntry({
+          type: entry.type,
+          person: entry.person,
+          date: entry.date,
+          value: entry.value,
+          description: entry.description
+        });
+
+        if (response.success) {
+          setEntries(prev => [...prev, response.data!.entry]);
+        } else {
+          alert(response.error || 'Erro ao criar entrada');
+          return;
+        }
+      }
+      
+      setEditingEntry(null);
+      setShowForm(false);
+    } catch (error) {
+      console.error('Erro ao salvar entrada:', error);
+      alert('Erro ao salvar entrada');
     }
-    setEditingEntry(null);
-    setShowForm(false);
   };
 
   const handleEditEntry = (entry: FinanceEntry) => {
@@ -89,8 +165,23 @@ function App() {
     setShowForm(true);
   };
 
-  const handleDeleteEntry = (id: string) => {
-    setEntries(prev => prev.filter(entry => entry.id !== id));
+  const handleDeleteEntry = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir esta entrada?')) {
+      return;
+    }
+
+    try {
+      const response = await apiService.deleteEntry(id);
+      
+      if (response.success) {
+        setEntries(prev => prev.filter(entry => entry.id !== id));
+      } else {
+        alert(response.error || 'Erro ao deletar entrada');
+      }
+    } catch (error) {
+      console.error('Erro ao deletar entrada:', error);
+      alert('Erro ao deletar entrada');
+    }
   };
 
   const handleCloseForm = () => {
@@ -98,15 +189,31 @@ function App() {
     setEditingEntry(null);
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            Meu Controle Financeiro
-          </h1>
-          <p className="text-lg text-gray-600 font-medium">Gerencie suas finanças com estilo e simplicidade</p>
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-lg font-semibold text-gray-600">Carregando dados...</p>
+          </div>
         </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Header />
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 py-8 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
+              Meu Controle Financeiro
+            </h1>
+            <p className="text-lg text-gray-600 font-medium">Gerencie suas finanças com estilo e simplicidade</p>
+          </div>
 
         <div className="flex flex-wrap gap-4 mb-8 justify-center">
           <button
@@ -204,7 +311,7 @@ function App() {
       </div>
 
       <Modal isOpen={showPersonManager} onClose={() => setShowPersonManager(false)}>
-        <PersonManager people={people} setPeople={setPeople} />
+        <PersonManagerWithAPI people={people} setPeople={setPeople} />
       </Modal>
 
       <Modal isOpen={showResumo} onClose={() => setShowResumo(false)}>
@@ -244,7 +351,31 @@ function App() {
           </div>
         </div>
       </Modal>
-    </div>
+      </div>
+    </>
+  );
+}
+
+function LoginPage() {
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
+
+  return (
+    <Login 
+      onToggleMode={() => setIsRegisterMode(!isRegisterMode)}
+      isRegisterMode={isRegisterMode}
+    />
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AuthGuard
+        fallback={<LoginPage />}
+      >
+        <FinancialApp />
+      </AuthGuard>
+    </AuthProvider>
   );
 }
 

@@ -49,6 +49,7 @@ export function EntryForm({ onAdd, visible, onClose, people, initialEntry }: Pro
     e.preventDefault();
 
     if (!entry.value || isNaN(Number(entry.value))) return alert('Informe um valor válido!');
+    if (Number(entry.value) <= 0) return alert('O valor deve ser maior que zero!');
     if (!entry.person) return alert('Selecione uma pessoa.');
     if (!entry.description.trim()) return alert('A descrição é obrigatória.');
 
@@ -138,10 +139,14 @@ export function EntryForm({ onAdd, visible, onClose, people, initialEntry }: Pro
           <input
             type="number"
             step="0.01"
+            min="0.01"
             value={isNaN(entry.value) ? '' : entry.value}
             onChange={e => {
               const value = e.target.value;
-              setEntry({ ...entry, value: value === '' ? 0 : parseFloat(value) });
+              const numValue = value === '' ? 0 : parseFloat(value);
+              if (numValue >= 0) {
+                setEntry({ ...entry, value: numValue });
+              }
             }}
             className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm"
             placeholder="💰 0,00"

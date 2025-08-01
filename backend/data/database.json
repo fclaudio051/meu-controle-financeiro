@@ -55,16 +55,6 @@
       "description": "agua",
       "userId": "86eb0326-c7b6-4f63-a5e1-c33f4ab7af94",
       "createdAt": "2025-08-01T02:23:17.606Z"
-    },
-    {
-      "id": "e1fc9561-f085-4a9f-9c9b-4f69a3286913",
-      "type": "receita",
-      "person": "21261ebf-a777-4114-924f-6a403668bb3d",
-      "date": "2025-08-01",
-      "value": 2000,
-      "description": "salário",
-      "userId": "f6c4580d-974f-4656-9037-410490d84bac",
-      "createdAt": "2025-08-01T02:25:35.247Z"
     }
   ]
 }

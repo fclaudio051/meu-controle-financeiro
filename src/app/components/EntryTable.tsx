@@ -31,7 +31,7 @@ export function EntryTable({ entries, onDelete, onEdit, people }: Props) {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
-          {entries.map((entry, idx) => (
+          {entries.map((entry) => (
             <tr
               key={entry.id}
               className="hover:bg-white/80 transition-all duration-200 hover:shadow-lg"
