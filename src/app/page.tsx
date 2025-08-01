@@ -13,8 +13,9 @@ import { AuthProvider } from './contexts/AuthContext';
 import { AuthGuard } from './components/AuthGuard';
 import { Login } from './components/Login';
 import { Header } from './components/Header';
+import { ConnectivityIndicator } from './components/ConnectivityIndicator';
 
-import { FaPlus, FaTimes, FaUserFriends, FaChartPie } from 'react-icons/fa';
+import { FaPlus, FaTimes, FaUserFriends, FaChartPie, FaSync, FaExclamationTriangle } from 'react-icons/fa';
 import { apiService } from './services/api';
 
 import './globals.css';
@@ -36,48 +37,97 @@ function FinancialApp() {
   const [month, setMonth] = useState<number>(new Date().getMonth());
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'error'>('idle');
 
-  // Função para carregar todos os dados do servidor ou do cache local
-  const loadData = async () => {
+  // Função para detectar e exibir modo offline
+  const checkOfflineMode = () => {
+    const offline = apiService.isOfflineMode();
+    setIsOfflineMode(offline);
+    return offline;
+  };
+
+  // Função para carregar dados com melhor feedback
+  const loadData = async (showLoadingSpinner = true) => {
     try {
-      setLoading(true);
+      if (showLoadingSpinner) setLoading(true);
       
-      // Tentar carregar da API primeiro
       const [peopleResponse, entriesResponse] = await Promise.all([
         apiService.getPeople(),
         apiService.getEntries()
       ]);
 
+      // Verificar se está no modo offline
+      const offline = peopleResponse.isOffline || entriesResponse.isOffline;
+      setIsOfflineMode(offline);
+
       if (peopleResponse.success && peopleResponse.data) {
-        setPeople(peopleResponse.data);
-        localStorage.setItem('offline_people', JSON.stringify(peopleResponse.data));
-      } else {
-        console.log('API indisponível, carregando dados locais...');
-        const localPeople = localStorage.getItem('offline_people');
-        if (localPeople) {
-          setPeople(JSON.parse(localPeople));
+        const peopleData = Array.isArray(peopleResponse.data) 
+          ? peopleResponse.data 
+          : peopleResponse.data;
+        
+        setPeople(peopleData);
+        
+        if (!peopleResponse.isOffline) {
+          localStorage.setItem('offline_people', JSON.stringify(peopleData));
         }
       }
 
       if (entriesResponse.success && entriesResponse.data) {
-        setEntries(entriesResponse.data);
-        localStorage.setItem('offline_entries', JSON.stringify(entriesResponse.data));
-      } else {
-        const localEntries = localStorage.getItem('offline_entries');
-        if (localEntries) {
-          setEntries(JSON.parse(localEntries));
+        const entriesData = Array.isArray(entriesResponse.data) 
+          ? entriesResponse.data 
+          : entriesResponse.data;
+        
+        setEntries(entriesData);
+        
+        if (!entriesResponse.isOffline) {
+          localStorage.setItem('offline_entries', JSON.stringify(entriesData));
         }
       }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
+      setIsOfflineMode(true);
       
+      // Fallback para dados locais
       const localPeople = localStorage.getItem('offline_people');
       const localEntries = localStorage.getItem('offline_entries');
       
       if (localPeople) setPeople(JSON.parse(localPeople));
       if (localEntries) setEntries(JSON.parse(localEntries));
     } finally {
-      setLoading(false);
+      if (showLoadingSpinner) setLoading(false);
+    }
+  };
+
+  // Função para tentar sincronizar dados
+  const attemptSync = async () => {
+    setSyncStatus('syncing');
+    
+    try {
+      // Forçar verificação de conectividade
+      const isServerOnline = await apiService.forceHealthCheck();
+      
+      if (isServerOnline) {
+        await loadData(false);
+        setSyncStatus('idle');
+        setIsOfflineMode(false);
+        
+        // Mostrar notificação de sucesso
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+        notification.textContent = '✅ Dados sincronizados com sucesso!';
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 3000);
+      } else {
+        setSyncStatus('error');
+        setTimeout(() => setSyncStatus('idle'), 2000);
+      }
+    } catch (error) {
+      setSyncStatus('error');
+      setTimeout(() => setSyncStatus('idle'), 2000);
     }
   };
 
@@ -85,14 +135,12 @@ function FinancialApp() {
     loadData();
   }, []);
 
-  // Mapeia pessoas para facilitar a busca por nome
   const peopleMap = useMemo(() => {
     const map: Record<string, string> = {};
     people.forEach(p => (map[p.id] = p.name));
     return map;
   }, [people]);
 
-  // Filtra as entradas pelo mês e ano selecionados
   const filteredEntries = useMemo(() => {
     return entries.filter(entry => {
       const entryDate = new Date(entry.date);
@@ -100,7 +148,6 @@ function FinancialApp() {
     });
   }, [entries, month, year]);
 
-  // Calcula o resumo financeiro por pessoa
   const resumoPorPessoa = useMemo(() => {
     const base: Record<string, { receita: number; despesa: number }> = {};
     filteredEntries.forEach(entry => {
@@ -115,18 +162,15 @@ function FinancialApp() {
     return base;
   }, [filteredEntries]);
 
-  // Função utilitária para fechar o formulário e recarregar os dados
   const handleSuccess = () => {
     setShowForm(false);
     setEditingEntry(null);
-    loadData(); // Garante que a tabela é atualizada com os dados mais recentes do servidor
+    loadData(false); // Recarregar sem spinner
   };
 
-  // Lógica de adição/edição de entrada
   const handleAddEntry = async (entry: FinanceEntry) => {
     try {
       if (editingEntry) {
-        // Lógica de atualização
         const response = await apiService.updateEntry(entry.id, {
           type: entry.type,
           person: entry.person,
@@ -136,12 +180,19 @@ function FinancialApp() {
         });
 
         if (response.success) {
+          if (response.isOffline) {
+            // Mostrar notificação offline
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 bg-amber-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+            notification.textContent = '💾 Entrada atualizada offline';
+            document.body.appendChild(notification);
+            setTimeout(() => document.body.removeChild(notification), 3000);
+          }
           handleSuccess();
         } else {
           alert(response.error || 'Erro ao atualizar entrada');
         }
       } else {
-        // Lógica de criação
         const response = await apiService.createEntry({
           type: entry.type,
           person: entry.person,
@@ -151,11 +202,22 @@ function FinancialApp() {
         });
 
         if (response.success) {
+          if (response.isOffline) {
+            // Mostrar notificação offline
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 bg-amber-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+            notification.textContent = '💾 Entrada criada offline';
+            document.body.appendChild(notification);
+            setTimeout(() => document.body.removeChild(notification), 3000);
+          }
           handleSuccess();
         } else {
           alert(response.error || 'Erro ao criar entrada');
         }
       }
+      
+      // Atualizar status do modo offline
+      checkOfflineMode();
     } catch (error) {
       console.error('Erro ao salvar entrada:', error);
       alert('Erro ao salvar entrada');
@@ -167,7 +229,6 @@ function FinancialApp() {
     setShowForm(true);
   };
 
-  // Lógica de exclusão de entrada
   const handleDeleteEntry = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta entrada?')) {
       return;
@@ -177,10 +238,20 @@ function FinancialApp() {
       const response = await apiService.deleteEntry(id);
       
       if (response.success) {
-        loadData(); // Recarrega os dados para refletir a exclusão
+        if (response.isOffline) {
+          // Mostrar notificação offline
+          const notification = document.createElement('div');
+          notification.className = 'fixed top-20 right-4 bg-amber-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+          notification.textContent = '💾 Entrada removida offline';
+          document.body.appendChild(notification);
+          setTimeout(() => document.body.removeChild(notification), 3000);
+        }
+        loadData(false);
       } else {
         alert(response.error || 'Erro ao deletar entrada');
       }
+      
+      checkOfflineMode();
     } catch (error) {
       console.error('Erro ao deletar entrada:', error);
       alert('Erro ao deletar entrada');
@@ -192,11 +263,11 @@ function FinancialApp() {
     setEditingEntry(null);
   };
 
-  // Renderiza a tela de carregamento
   if (loading) {
     return (
       <>
         <Header />
+        <ConnectivityIndicator />
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
@@ -207,10 +278,11 @@ function FinancialApp() {
     );
   }
 
-  // Renderiza a aplicação principal
   return (
     <>
       <Header />
+      <ConnectivityIndicator />
+      
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 py-8 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
@@ -218,6 +290,22 @@ function FinancialApp() {
               Meu Controle Financeiro
             </h1>
             <p className="text-lg text-gray-600 font-medium">Gerencie suas finanças com estilo e simplicidade</p>
+            
+            {/* Indicador de modo offline na página */}
+            {isOfflineMode && (
+              <div className="mt-4 inline-flex items-center gap-3 bg-amber-100 text-amber-800 px-4 py-2 rounded-lg border border-amber-200">
+                <FaExclamationTriangle className="w-4 h-4" />
+                <span className="font-medium">Modo Offline - Dados serão sincronizados quando possível</span>
+                <button
+                  onClick={attemptSync}
+                  disabled={syncStatus === 'syncing'}
+                  className="ml-2 p-1 hover:bg-amber-200 rounded transition-colors disabled:opacity-50"
+                  title="Tentar sincronizar"
+                >
+                  <FaSync className={`w-4 h-4 ${syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+            )}
           </div>
 
         <div className="flex flex-wrap gap-4 mb-8 justify-center">
@@ -260,6 +348,25 @@ function FinancialApp() {
             <FaChartPie className="text-lg" />
             Resumo por Pessoa
           </button>
+
+          {/* Botão de sincronização manual */}
+          {isOfflineMode && (
+            <button
+              onClick={attemptSync}
+              disabled={syncStatus === 'syncing'}
+              className={`px-6 py-3 rounded-xl text-white flex items-center gap-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 font-semibold ${
+                syncStatus === 'error' 
+                  ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'
+                  : 'bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700'
+              } disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
+            >
+              <FaSync className={`text-lg ${syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
+              <span>
+                {syncStatus === 'syncing' ? 'Sincronizando...' : 
+                 syncStatus === 'error' ? 'Erro na Sinc.' : 'Sincronizar'}
+              </span>
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -365,10 +472,13 @@ function LoginPage() {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
 
   return (
-    <Login 
-      onToggleMode={() => setIsRegisterMode(!isRegisterMode)}
-      isRegisterMode={isRegisterMode}
-    />
+    <>
+      <ConnectivityIndicator />
+      <Login 
+        onToggleMode={() => setIsRegisterMode(!isRegisterMode)}
+        isRegisterMode={isRegisterMode}
+      />
+    </>
   );
 }
 

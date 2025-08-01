@@ -33,15 +33,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     const initAuth = async () => {
-      // Verificar se há um token válido
       const token = localStorage.getItem('auth_token');
       const storedUser = localStorage.getItem('currentUser');
       
       if (token && storedUser) {
         try {
-          // Verificar se o token ainda é válido
           const response = await apiService.verifyToken();
           
+          // Corrigido: verificando a estrutura de resposta correta
           if (response.success && response.data?.user) {
             setAuthState({
               user: response.data.user,
@@ -49,7 +48,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
               isLoading: false,
             });
           } else {
-            // Token inválido, limpar dados
             localStorage.removeItem('auth_token');
             localStorage.removeItem('currentUser');
             setAuthState({
@@ -59,7 +57,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             });
           }
         } catch {
-          // Erro na verificação, usar dados locais como fallback
           try {
             const user: User = JSON.parse(storedUser);
             setAuthState({
@@ -95,7 +92,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await apiService.login(email, password);
       
-      if (response.success && response.data?.user) {
+      // Corrigido: verificando a estrutura de resposta correta
+      if (response.success && response.data?.user && response.data?.token) {
         setAuthState({
           user: response.data.user,
           isAuthenticated: true,
@@ -104,10 +102,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return true;
       } else {
         // Fallback para modo offline com credenciais de teste
-        if (response.error?.includes('offline') || response.error?.includes('Timeout')) {
+        if (response.error?.includes('offline') || response.error?.includes('Timeout') || response.error?.includes('conexão')) {
           console.log('Modo offline - usando autenticação local');
           
-          // Credenciais de teste para modo offline
           const testUsers = [
             { id: '1', name: 'Admin', email: 'admin@exemplo.com', password: 'admin123' },
             { id: '2', name: 'User', email: 'user@exemplo.com', password: 'user123' },
@@ -154,7 +151,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await apiService.register(name, email, password);
       
-      if (response.success && response.data?.user) {
+      // Corrigido: verificando a estrutura de resposta correta
+      if (response.success && response.data?.user && response.data?.token) {
         setAuthState({
           user: response.data.user,
           isAuthenticated: true,

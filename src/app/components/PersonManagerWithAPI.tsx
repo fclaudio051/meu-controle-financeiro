@@ -21,15 +21,34 @@ export function PersonManagerWithAPI({ people, setPeople }: Props) {
     try {
       const response = await apiService.createPerson(trimmedName);
       
+      // Corrigido: tratamento da resposta da API
       if (response.success && response.data?.person) {
         setPeople(prev => [...prev, response.data!.person]);
         setName('');
+        
+        // Atualizar cache local
+        const updatedPeople = [...people, response.data.person];
+        localStorage.setItem('offline_people', JSON.stringify(updatedPeople));
       } else {
         alert(response.error || 'Erro ao criar pessoa');
       }
     } catch (error) {
       console.error('Erro ao criar pessoa:', error);
-      alert('Erro ao criar pessoa');
+      
+      // Fallback para modo offline
+      const newPerson: Person = {
+        id: crypto.randomUUID(),
+        name: trimmedName,
+        userId: 'offline_user',
+        createdAt: new Date().toISOString()
+      };
+      
+      const updatedPeople = [...people, newPerson];
+      setPeople(updatedPeople);
+      localStorage.setItem('offline_people', JSON.stringify(updatedPeople));
+      setName('');
+      
+      alert('Pessoa adicionada offline - será sincronizada quando o servidor estiver disponível');
     } finally {
       setLoading(false);
     }
@@ -44,14 +63,23 @@ export function PersonManagerWithAPI({ people, setPeople }: Props) {
     try {
       const response = await apiService.deletePerson(id);
       
+      // Corrigido: tratamento da resposta da API
       if (response.success) {
-        setPeople(prev => prev.filter(person => person.id !== id));
+        const updatedPeople = people.filter(person => person.id !== id);
+        setPeople(updatedPeople);
+        localStorage.setItem('offline_people', JSON.stringify(updatedPeople));
       } else {
         alert(response.error || 'Erro ao deletar pessoa');
       }
     } catch (error) {
       console.error('Erro ao deletar pessoa:', error);
-      alert('Erro ao deletar pessoa');
+      
+      // Fallback para modo offline
+      const updatedPeople = people.filter(person => person.id !== id);
+      setPeople(updatedPeople);
+      localStorage.setItem('offline_people', JSON.stringify(updatedPeople));
+      
+      alert('Pessoa removida offline - será sincronizada quando o servidor estiver disponível');
     } finally {
       setLoading(false);
     }

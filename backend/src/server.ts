@@ -12,18 +12,9 @@ import entriesRoutes from './routes/entries';
 
 const app = express();
 
-// --- CORREÇÕES IMPLEMENTADAS AQUI ---
-// Define a porta do servidor, usando a variável de ambiente do Render ou 3001 como fallback.
-// O parseInt() converte o valor da string para um número, resolvendo o erro do TypeScript.
 const PORT = parseInt(process.env.PORT as string, 10) || 3001;
-
-// Define o host para o servidor. '0.0.0.0' garante que ele será acessível externamente no Render.
 const HOST = '0.0.0.0';
-
-// Define a origem permitida para o CORS, usando a variável de ambiente ou localhost como fallback.
 const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
-// --- FIM DAS CORREÇÕES ---
-
 
 // Middlewares
 app.use(cors({
@@ -38,7 +29,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Rota de teste primeiro
+// Rota de health check no prefixo /api (como esperado pelo frontend)
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
@@ -47,19 +38,45 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Rotas da API
+// Corrigido: Rotas da API sem prefixo /api, pois o frontend já foi corrigido
 app.use('/auth', authRoutes);
 app.use('/people', peopleRoutes);
 app.use('/entries', entriesRoutes);
 
-// Altera a linha de app.listen para incluir o HOST e logs de debug.
+// Rota adicional para compatibilidade com health check
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    message: 'Servidor funcionando!',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Middleware de tratamento de erros
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Erro não tratado:', err);
+  res.status(500).json({
+    error: 'Erro interno do servidor',
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Algo deu errado'
+  });
+});
+
+// Middleware para rotas não encontradas
+app.use('*', (req, res) => {
+  res.status(404).json({
+    error: 'Rota não encontrada',
+    message: `A rota ${req.method} ${req.originalUrl} não existe`
+  });
+});
+
 app.listen(PORT, HOST, () => {
   console.log(`🚀 Servidor rodando em http://${HOST}:${PORT}`);
-  console.log(`📋 API disponível em: http://${HOST}:${PORT}/api`);
+  console.log(`📋 API disponível em: http://${HOST}:${PORT}`);
   console.log(`💚 Health check: http://${HOST}:${PORT}/api/health`);
   console.log(`- Valores de ambiente detectados:`);
   console.log(`  - PORT: ${PORT}`);
   console.log(`  - CORS_ORIGIN: ${allowedOrigin}`);
+  console.log(`  - NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
 });
 
 export default app;

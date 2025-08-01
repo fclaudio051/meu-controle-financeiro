@@ -2,10 +2,8 @@ import { User } from '../types/User';
 import { Person } from '../types/person';
 import { FinanceEntry } from '../types/Entry';
 
-// --- MODIFICAÇÃO PRINCIPAL AQUI ---
-// Use a variável de ambiente VITE_API_URL, com um fallback para localhost para desenvolvimento.
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-// --- FIM DA MODIFICAÇÃO ---
+// Corrigido: removendo /api do base URL pois as rotas do backend não usam este prefixo
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -37,7 +35,7 @@ class ApiService {
       }
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
@@ -56,6 +54,7 @@ class ApiService {
         };
       }
 
+      // Corrigido: retornando os dados diretamente como o backend envia
       return {
         success: true,
         data,
@@ -85,7 +84,7 @@ class ApiService {
     }
   }
 
-  // Autenticação
+  // Autenticação - Corrigido para usar as rotas corretas do backend
   async login(email: string, password: string) {
     const response = await this.request<{ user: User; token: string }>('/auth/login', {
       method: 'POST',
@@ -123,13 +122,13 @@ class ApiService {
     localStorage.removeItem('currentUser');
   }
 
-  // Pessoas
+  // Pessoas - Corrigido para usar as rotas corretas
   async getPeople() {
     return this.request<Person[]>('/people');
   }
 
   async createPerson(name: string) {
-    return this.request<{ person: Person }>('/people', {
+    return this.request<{ person: Person; message: string }>('/people', {
       method: 'POST',
       body: JSON.stringify({ name }),
     });
@@ -141,7 +140,7 @@ class ApiService {
     });
   }
 
-  // Entradas financeiras
+  // Entradas financeiras - Corrigido para usar as rotas corretas
   async getEntries() {
     return this.request<FinanceEntry[]>('/entries');
   }
@@ -153,7 +152,7 @@ class ApiService {
     value: number;
     description: string;
   }) {
-    return this.request<{ entry: FinanceEntry }>('/entries', {
+    return this.request<{ entry: FinanceEntry; message: string }>('/entries', {
       method: 'POST',
       body: JSON.stringify(entry),
     });
@@ -166,7 +165,7 @@ class ApiService {
     value: number;
     description: string;
   }) {
-    return this.request<{ entry: FinanceEntry }>(`/entries/${id}`, {
+    return this.request<{ entry: FinanceEntry; message: string }>(`/entries/${id}`, {
       method: 'PUT',
       body: JSON.stringify(entry),
     });
@@ -178,9 +177,9 @@ class ApiService {
     });
   }
 
-  // Health check
+  // Health check - Corrigido para usar a rota correta
   async healthCheck() {
-    return this.request<{ status: string; message: string }>('/health');
+    return this.request<{ status: string; message: string; timestamp: string }>('/api/health');
   }
 }
 
