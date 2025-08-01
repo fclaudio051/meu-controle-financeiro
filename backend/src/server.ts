@@ -11,8 +11,18 @@ import peopleRoutes from './routes/people';
 import entriesRoutes from './routes/entries';
 
 const app = express();
+
+// --- MODIFICAÇÕES AQUI ---
+// Define a porta do servidor, usando a variável de ambiente do Render ou 3001 como fallback.
 const PORT = process.env.PORT || 3001;
+
+// Define o host para o servidor. '0.0.0.0' garante que ele será acessível externamente no Render.
+const HOST = '0.0.0.0';
+
+// Define a origem permitida para o CORS, usando a variável de ambiente ou localhost como fallback.
 const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
+// --- FIM DAS MODIFICAÇÕES ---
+
 
 // Middlewares
 app.use(cors({
@@ -29,8 +39,8 @@ app.use((req, res, next) => {
 
 // Rota de teste primeiro
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     message: 'Servidor funcionando!',
     timestamp: new Date().toISOString()
   });
@@ -41,10 +51,15 @@ app.use('/api/auth', authRoutes);
 app.use('/api/people', peopleRoutes);
 app.use('/api/entries', entriesRoutes);
 
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
-  console.log(`📋 API disponível em: http://localhost:${PORT}/api`);
-  console.log(`💚 Health check: http://localhost:${PORT}/api/health`);
+// --- MODIFICAÇÕES AQUI ---
+// Altera a linha de app.listen para incluir o HOST e um log de debug.
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 Servidor rodando em http://${HOST}:${PORT}`);
+  console.log(`📋 API disponível em: http://${HOST}:${PORT}/api`);
+  console.log(`💚 Health check: http://${HOST}:${PORT}/api/health`);
+  console.log(`- Valores de ambiente detectados:`);
+  console.log(`  - PORT: ${PORT}`);
+  console.log(`  - CORS_ORIGIN: ${allowedOrigin}`);
 });
 
 export default app;
