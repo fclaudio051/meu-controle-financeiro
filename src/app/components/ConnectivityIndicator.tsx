@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FaWifi, FaWifiSlash, FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
+import { FaWifi, FaExclamationTriangle, FaCheckCircle, FaTimes } from 'react-icons/fa';
 import { apiService } from '../services/api';
 
 export function ConnectivityIndicator() {
@@ -59,7 +59,7 @@ export function ConnectivityIndicator() {
   const getStatusInfo = () => {
     if (!isOnline) {
       return {
-        icon: FaWifiSlash,
+        icon: FaTimes, // Substituído FaWifiSlash por FaTimes
         text: 'Sem Conexão',
         color: 'bg-red-100 text-red-800 border-red-200',
         bgColor: 'bg-red-500'

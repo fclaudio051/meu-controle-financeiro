@@ -8,6 +8,8 @@ interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   register: (name: string, email: string, password: string) => Promise<boolean>;
+  isOffline: boolean;
+  lastError: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,6 +33,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading: true,
   });
 
+  const [isOffline, setIsOffline] = useState(false);
+  const [lastError, setLastError] = useState<string | null>(null);
+
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem('auth_token');
@@ -40,23 +45,48 @@ export function AuthProvider({ children }: AuthProviderProps) {
         try {
           const response = await apiService.verifyToken();
           
-          // Corrigido: verificando a estrutura de resposta correta
           if (response.success && response.data?.user) {
             setAuthState({
               user: response.data.user,
               isAuthenticated: true,
               isLoading: false,
             });
+            setIsOffline(false);
           } else {
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('currentUser');
-            setAuthState({
-              user: null,
-              isAuthenticated: false,
-              isLoading: false,
-            });
+            // Se falhou a verificação online, tentar modo offline
+            if (response.isOffline) {
+              try {
+                const user: User = JSON.parse(storedUser);
+                setAuthState({
+                  user,
+                  isAuthenticated: true,
+                  isLoading: false,
+                });
+                setIsOffline(true);
+              } catch {
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('currentUser');
+                setAuthState({
+                  user: null,
+                  isAuthenticated: false,
+                  isLoading: false,
+                });
+                setIsOffline(false);
+              }
+            } else {
+              localStorage.removeItem('auth_token');
+              localStorage.removeItem('currentUser');
+              setAuthState({
+                user: null,
+                isAuthenticated: false,
+                isLoading: false,
+              });
+              setIsOffline(false);
+            }
           }
-        } catch {
+        } catch (error) {
+          console.error('Erro na verificação do token:', error);
+          // Fallback para modo offline
           try {
             const user: User = JSON.parse(storedUser);
             setAuthState({
@@ -64,6 +94,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
               isAuthenticated: true,
               isLoading: false,
             });
+            setIsOffline(true);
           } catch {
             localStorage.removeItem('auth_token');
             localStorage.removeItem('currentUser');
@@ -72,6 +103,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
               isAuthenticated: false,
               isLoading: false,
             });
+            setIsOffline(false);
           }
         }
       } else {
@@ -80,6 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           isAuthenticated: false,
           isLoading: false,
         });
+        setIsOffline(false);
       }
     };
 
@@ -88,22 +121,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
+    setLastError(null);
 
     try {
       const response = await apiService.login(email, password);
       
-      // Corrigido: verificando a estrutura de resposta correta
       if (response.success && response.data?.user && response.data?.token) {
         setAuthState({
           user: response.data.user,
           isAuthenticated: true,
           isLoading: false,
         });
+        setIsOffline(false);
         return true;
       } else {
         // Fallback para modo offline com credenciais de teste
-        if (response.error?.includes('offline') || response.error?.includes('Timeout') || response.error?.includes('conexão')) {
-          console.log('Modo offline - usando autenticação local');
+        if (response.isOffline || response.error?.includes('offline') || response.error?.includes('Timeout') || response.error?.includes('conexão')) {
+          console.log('Tentando login offline...');
           
           const testUsers = [
             { id: '1', name: 'Admin', email: 'admin@exemplo.com', password: 'admin123' },
@@ -123,8 +157,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
               isAuthenticated: true,
               isLoading: false,
             });
+            setIsOffline(true);
             return true;
+          } else {
+            setLastError('Credenciais inválidas para modo offline');
           }
+        } else {
+          setLastError(response.error || 'Erro no login');
         }
 
         setAuthState({
@@ -132,40 +171,48 @@ export function AuthProvider({ children }: AuthProviderProps) {
           isAuthenticated: false,
           isLoading: false,
         });
+        setIsOffline(response.isOffline || false);
         return false;
       }
     } catch (error) {
       console.error('Erro no login:', error);
+      setLastError('Erro de conexão');
       setAuthState({
         user: null,
         isAuthenticated: false,
         isLoading: false,
       });
+      setIsOffline(true);
       return false;
     }
   };
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
+    setLastError(null);
 
     try {
       const response = await apiService.register(name, email, password);
       
-      // Corrigido: verificando a estrutura de resposta correta
       if (response.success && response.data?.user && response.data?.token) {
         setAuthState({
           user: response.data.user,
           isAuthenticated: true,
           isLoading: false,
         });
+        setIsOffline(false);
         return true;
       } else {
+        setLastError(response.error || 'Erro no registro');
         setAuthState(prev => ({ ...prev, isLoading: false }));
+        setIsOffline(response.isOffline || false);
         return false;
       }
     } catch (error) {
       console.error('Erro no registro:', error);
+      setLastError('Erro de conexão');
       setAuthState(prev => ({ ...prev, isLoading: false }));
+      setIsOffline(true);
       return false;
     }
   };
@@ -177,6 +224,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isAuthenticated: false,
       isLoading: false,
     });
+    setIsOffline(false);
+    setLastError(null);
   };
 
   return (
@@ -185,6 +234,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       login,
       logout,
       register,
+      isOffline,
+      lastError,
     }}>
       {children}
     </AuthContext.Provider>

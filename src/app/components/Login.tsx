@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { FaUser, FaLock, FaEye, FaEyeSlash, FaSpinner, FaArrowRight, FaWifi, FaWifiSlash } from 'react-icons/fa';
+import { FaUser, FaLock, FaEye, FaEyeSlash, FaSpinner, FaArrowRight, FaWifi, FaTimes } from 'react-icons/fa';
 
 interface LoginProps {
   onToggleMode: () => void;
@@ -59,7 +59,7 @@ export function Login({ onToggleMode, isRegisterMode }: LoginProps) {
           }`}>
             {isOffline ? (
               <>
-                <FaWifiSlash className="w-4 h-4" />
+                <FaTimes className="w-4 h-4" />
                 Modo Offline
               </>
             ) : (
@@ -177,7 +177,7 @@ export function Login({ onToggleMode, isRegisterMode }: LoginProps) {
           {isOffline && !isRegisterMode && (
             <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
               <div className="flex items-center gap-3 text-amber-800">
-                <FaWifiSlash className="w-5 h-5 flex-shrink-0" />
+                <FaTimes className="w-5 h-5 flex-shrink-0" />
                 <div className="text-sm">
                   <p className="font-semibold">Modo Offline Ativo</p>
                   <p>Use as credenciais de teste abaixo para entrar.</p>
