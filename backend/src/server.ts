@@ -12,10 +12,11 @@ import entriesRoutes from './routes/entries';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
 
 // Middlewares
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: allowedOrigin,
   credentials: true
 }));
 app.use(express.json());
