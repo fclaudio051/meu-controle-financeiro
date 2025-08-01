@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import { FinanceEntry } from './types/Entry';
@@ -37,6 +37,7 @@ function FinancialApp() {
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
 
+  // Função para carregar todos os dados do servidor ou do cache local
   const loadData = async () => {
     try {
       setLoading(true);
@@ -49,10 +50,8 @@ function FinancialApp() {
 
       if (peopleResponse.success && peopleResponse.data) {
         setPeople(peopleResponse.data);
-        // Salvar no localStorage como backup
         localStorage.setItem('offline_people', JSON.stringify(peopleResponse.data));
       } else {
-        // Fallback para localStorage se API não funcionar
         console.log('API indisponível, carregando dados locais...');
         const localPeople = localStorage.getItem('offline_people');
         if (localPeople) {
@@ -62,10 +61,8 @@ function FinancialApp() {
 
       if (entriesResponse.success && entriesResponse.data) {
         setEntries(entriesResponse.data);
-        // Salvar no localStorage como backup
         localStorage.setItem('offline_entries', JSON.stringify(entriesResponse.data));
       } else {
-        // Fallback para localStorage se API não funcionar
         const localEntries = localStorage.getItem('offline_entries');
         if (localEntries) {
           setEntries(JSON.parse(localEntries));
@@ -74,7 +71,6 @@ function FinancialApp() {
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       
-      // Fallback completo para dados locais
       const localPeople = localStorage.getItem('offline_people');
       const localEntries = localStorage.getItem('offline_entries');
       
@@ -89,12 +85,14 @@ function FinancialApp() {
     loadData();
   }, []);
 
+  // Mapeia pessoas para facilitar a busca por nome
   const peopleMap = useMemo(() => {
     const map: Record<string, string> = {};
     people.forEach(p => (map[p.id] = p.name));
     return map;
   }, [people]);
 
+  // Filtra as entradas pelo mês e ano selecionados
   const filteredEntries = useMemo(() => {
     return entries.filter(entry => {
       const entryDate = new Date(entry.date);
@@ -102,6 +100,7 @@ function FinancialApp() {
     });
   }, [entries, month, year]);
 
+  // Calcula o resumo financeiro por pessoa
   const resumoPorPessoa = useMemo(() => {
     const base: Record<string, { receita: number; despesa: number }> = {};
     filteredEntries.forEach(entry => {
@@ -116,10 +115,18 @@ function FinancialApp() {
     return base;
   }, [filteredEntries]);
 
+  // Função utilitária para fechar o formulário e recarregar os dados
+  const handleSuccess = () => {
+    setShowForm(false);
+    setEditingEntry(null);
+    loadData(); // Garante que a tabela é atualizada com os dados mais recentes do servidor
+  };
+
+  // Lógica de adição/edição de entrada
   const handleAddEntry = async (entry: FinanceEntry) => {
     try {
       if (editingEntry) {
-        // Atualizar entrada existente
+        // Lógica de atualização
         const response = await apiService.updateEntry(entry.id, {
           type: entry.type,
           person: entry.person,
@@ -129,13 +136,12 @@ function FinancialApp() {
         });
 
         if (response.success) {
-          setEntries(prev => prev.map(e => (e.id === entry.id ? response.data!.entry : e)));
+          handleSuccess();
         } else {
           alert(response.error || 'Erro ao atualizar entrada');
-          return;
         }
       } else {
-        // Criar nova entrada
+        // Lógica de criação
         const response = await apiService.createEntry({
           type: entry.type,
           person: entry.person,
@@ -145,15 +151,11 @@ function FinancialApp() {
         });
 
         if (response.success) {
-          setEntries(prev => [...prev, response.data!.entry]);
+          handleSuccess();
         } else {
           alert(response.error || 'Erro ao criar entrada');
-          return;
         }
       }
-      
-      setEditingEntry(null);
-      setShowForm(false);
     } catch (error) {
       console.error('Erro ao salvar entrada:', error);
       alert('Erro ao salvar entrada');
@@ -165,6 +167,7 @@ function FinancialApp() {
     setShowForm(true);
   };
 
+  // Lógica de exclusão de entrada
   const handleDeleteEntry = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta entrada?')) {
       return;
@@ -174,7 +177,7 @@ function FinancialApp() {
       const response = await apiService.deleteEntry(id);
       
       if (response.success) {
-        setEntries(prev => prev.filter(entry => entry.id !== id));
+        loadData(); // Recarrega os dados para refletir a exclusão
       } else {
         alert(response.error || 'Erro ao deletar entrada');
       }
@@ -189,6 +192,7 @@ function FinancialApp() {
     setEditingEntry(null);
   };
 
+  // Renderiza a tela de carregamento
   if (loading) {
     return (
       <>
@@ -203,6 +207,7 @@ function FinancialApp() {
     );
   }
 
+  // Renderiza a aplicação principal
   return (
     <>
       <Header />
