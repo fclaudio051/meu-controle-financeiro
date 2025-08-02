@@ -257,75 +257,63 @@ class ApiService {
     return response;
   }
 
-  async createEntry(entry: {
-    type: string;
-    person: string;
-    date: string;
-    value: number;
-    description: string;
-  }) {
-    const response = await this.request<{ entry: FinanceEntry; message: string }>('/entries', {
-      method: 'POST',
-      body: JSON.stringify(entry),
-    });
+  async createEntry(entry: Omit<FinanceEntry, 'id' | 'createdAt'>) {
+  const response = await this.request<{ entry: FinanceEntry; message: string }>('/entries', {
+    method: 'POST',
+    body: JSON.stringify(entry),
+  });
 
-    if (!response.success && response.isOffline) {
-      // Fallback offline
-      const newEntry: FinanceEntry = {
-        id: crypto.randomUUID(),
-        ...entry,
-        createdAt: new Date(),
-      };
+  if (!response.success && response.isOffline) {
+    // Fallback offline
+    const newEntry: FinanceEntry = {
+      id: crypto.randomUUID(),
+      ...entry,
+      createdAt: new Date(),
+    };
 
-      const localEntries = localStorage.getItem('offline_entries');
-      const entries = localEntries ? JSON.parse(localEntries) : [];
-      entries.push(newEntry);
-      localStorage.setItem('offline_entries', JSON.stringify(entries));
+    const localEntries = localStorage.getItem('offline_entries');
+    const entries = localEntries ? JSON.parse(localEntries) : [];
+    entries.push(newEntry);
+    localStorage.setItem('offline_entries', JSON.stringify(entries));
 
-      return {
-        success: true,
-        data: { entry: newEntry, message: 'Entrada criada offline' },
-        isOffline: true,
-      };
-    }
-
-    return response;
+    return {
+      success: true,
+      data: { entry: newEntry, message: 'Entrada criada offline' },
+      isOffline: true,
+    };
   }
 
-  async updateEntry(id: string, entry: {
-    type: string;
-    person: string;
-    date: string;
-    value: number;
-    description: string;
-  }) {
-    const response = await this.request<{ entry: FinanceEntry; message: string }>(`/entries/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(entry),
-    });
+  return response;
+}
 
-    if (!response.success && response.isOffline) {
-      // Fallback offline
-      const localEntries = localStorage.getItem('offline_entries');
-      if (localEntries) {
-        const entries = JSON.parse(localEntries);
-        const entryIndex = entries.findIndex((e: FinanceEntry) => e.id === id);
-        if (entryIndex !== -1) {
-          entries[entryIndex] = { ...entries[entryIndex], ...entry };
-          localStorage.setItem('offline_entries', JSON.stringify(entries));
-        }
+
+  async updateEntry(id: string, entry: Omit<FinanceEntry, 'id' | 'createdAt'>) {
+  const response = await this.request<{ entry: FinanceEntry; message: string }>(`/entries/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(entry),
+  });
+
+  if (!response.success && response.isOffline) {
+    // Fallback offline
+    const localEntries = localStorage.getItem('offline_entries');
+    if (localEntries) {
+      const entries = JSON.parse(localEntries);
+      const entryIndex = entries.findIndex((e: FinanceEntry) => e.id === id);
+      if (entryIndex !== -1) {
+        entries[entryIndex] = { ...entries[entryIndex], ...entry };
+        localStorage.setItem('offline_entries', JSON.stringify(entries));
       }
-
-      return {
-        success: true,
-        data: { entry: { id, ...entry } as FinanceEntry, message: 'Entrada atualizada offline' },
-        isOffline: true,
-      };
     }
 
-    return response;
+    return {
+      success: true,
+      data: { entry: { id, ...entry } as FinanceEntry, message: 'Entrada atualizada offline' },
+      isOffline: true,
+    };
   }
 
+  return response;
+}
   async deleteEntry(id: string) {
     const response = await this.request<{ message: string }>(`/entries/${id}`, {
       method: 'DELETE',
