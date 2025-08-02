@@ -456,7 +456,6 @@ function LoginPage() {
 
   return (
     <>
-      <ConnectivityIndicator />
       <Login
         onToggleMode={() => setIsRegisterMode(!isRegisterMode)}
         isRegisterMode={isRegisterMode}
