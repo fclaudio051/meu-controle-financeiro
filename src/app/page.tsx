@@ -13,7 +13,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import { AuthGuard } from './components/AuthGuard';
 import { Login } from './components/Login';
 import { Header } from './components/Header';
-import { ConnectivityIndicator } from './components/ConnectivityIndicator';
 
 import { FaPlus, FaTimes, FaUserFriends, FaChartPie, FaSync, FaExclamationTriangle } from 'react-icons/fa';
 import { apiService } from './services/api';
@@ -256,7 +255,6 @@ function FinancialApp() {
     return (
       <>
         <Header />
-        <ConnectivityIndicator />
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
@@ -269,9 +267,7 @@ function FinancialApp() {
 
   return (
     <>
-      <Header />
-      <ConnectivityIndicator />
-      
+      <Header />  
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 py-8 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
