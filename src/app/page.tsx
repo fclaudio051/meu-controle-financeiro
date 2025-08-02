@@ -387,7 +387,7 @@ function FinancialApp() {
                       type="number"
                       value={year}
                       onChange={e => setYear(parseInt(e.target.value))}
-                      className="p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium"
+                      className="w-full sm:w-40 p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium"
                     />
                   </div>
                 </div>
