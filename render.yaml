@@ -1,8 +1,5 @@
 # Arquivo: render.yaml
-# Atenção à indentação! Cada nível de recuo deve usar 2 espaços.
-
 services:
-  # O hífen '-' indica um item na lista de serviços
   - type: web
     name: meu-controle-financeiro-api
     env: node
@@ -13,12 +10,6 @@ services:
       - key: DATABASE_URL
         value: postgresql://meu_controle_financeiro_db_user:v0xmBhB79xKVFnyzAdU4WYXIatnlzgwo@dpg-d26mjumuk2gs73c3m39g-a/meu_controle_financeiro_db
         sync: false
-    # O bloco 'ports' deve ter o mesmo recuo que 'envVars'
-    ports:
-      - port: 3001
-        protocol: http
-
-  # Segundo serviço na lista
   - type: web
     name: meu-controle-financeiro-web
     env: node
