@@ -1,7 +1,8 @@
 import express from 'express';
-import prisma from '../database'; // Importamos a instância do Prisma
+import { v4 as uuidv4 } from 'uuid'; // Para gerar IDs únicos para as entradas
+import { readDB, writeDB } from '../database'; // Importação corrigida para as funções do DB de arquivo
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { FinanceEntry, EntryType } from '../types';
+import { FinanceEntry, EntryType, Person } from '../types';
 
 const router = express.Router();
 
@@ -12,24 +13,27 @@ router.use(authMiddleware);
 router.get('/', async (req: AuthRequest, res) => {
   try {
     const userId = req.userId!;
+    const db = readDB();
 
-    // 1. Buscar todas as entradas do usuário usando o Prisma
-    // O 'include' faz um JOIN com a tabela 'Person'
-    const userEntries = await prisma.financeEntry.findMany({
-      where: { userId },
-      include: {
-        personRef: {
-          select: { id: true, name: true } // Selecionamos apenas os campos necessários da pessoa
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+    // 1. Filtrar as entradas do usuário e a pessoa de referência
+    const userEntries = db.entries
+      .filter(entry => entry.userId === userId)
+      .map(entry => {
+        // Encontrar a pessoa de referência para cada entrada
+        // CORREÇÃO: Usando entry.person em vez de entry.personId
+        const personRef = db.people.find(p => p.id === entry.person && p.userId === userId);
+        return {
+          ...entry,
+          personRef: personRef ? { id: personRef.id, name: personRef.name } : null
+        };
+      })
+      // 2. Ordenar as entradas por data de criação de forma decrescente
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     res.json(userEntries);
   } catch (error) {
-    console.error('Erro ao buscar entradas:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Erro interno do servidor';
+    console.error('Erro ao buscar entradas:', errorMessage);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
@@ -54,39 +58,42 @@ router.post('/', async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Descrição é obrigatória' });
     }
 
-    // 2. Verificar se a pessoa existe e pertence ao usuário com Prisma
-    const personExists = await prisma.person.findFirst({
-      where: {
-        id: person,
-        userId: userId,
-      },
-    });
+    const db = readDB();
+    
+    // 2. Verificar se a pessoa existe e pertence ao usuário
+    const personExists = db.people.find(p => p.id === person && p.userId === userId);
 
     if (!personExists) {
       return res.status(400).json({ error: 'Pessoa não encontrada' });
     }
 
-    // 3. Criar a nova entrada no banco de dados com Prisma
-    const newEntry = await prisma.financeEntry.create({
-      data: {
-        type: type as EntryType,
-        personId: person, // Conexão com o ID da pessoa
-        date: new Date(date),
-        value: Number(value),
-        description: description.trim(),
-        userId: userId,
-      },
-      include: {
-        personRef: true
-      }
-    });
+    // 3. Criar a nova entrada
+    // CORREÇÃO: Usando a propriedade 'person' em vez de 'personId'
+    const newEntry: FinanceEntry = {
+      id: uuidv4(),
+      type: type as EntryType,
+      person: person, // A ID da pessoa é atribuída à propriedade 'person'
+      date: new Date(date).toISOString(),
+      value: Number(value),
+      description: description.trim(),
+      userId: userId,
+      createdAt: new Date().toISOString()
+    };
+
+    // 4. Adicionar a nova entrada e salvar no banco de dados
+    db.entries.push(newEntry);
+    writeDB(db);
+
+    const personRef = { id: personExists.id, name: personExists.name };
+    const entryWithPersonRef = { ...newEntry, personRef };
 
     res.status(201).json({
       message: 'Entrada criada com sucesso',
-      entry: newEntry
+      entry: entryWithPersonRef
     });
   } catch (error) {
-    console.error('Erro ao criar entrada:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Erro interno do servidor';
+    console.error('Erro ao criar entrada:', errorMessage);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
@@ -109,50 +116,42 @@ router.put('/:id', async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Valor deve ser um número positivo' });
     }
 
-    // 4. Verificar se a entrada existe e pertence ao usuário com Prisma
-    const entryToUpdate = await prisma.financeEntry.findFirst({
-      where: {
-        id: id,
-        userId: userId,
-      },
-    });
+    const db = readDB();
+    
+    // 4. Encontrar o índice da entrada a ser atualizada
+    const entryIndex = db.entries.findIndex(entry => entry.id === id && entry.userId === userId);
 
-    if (!entryToUpdate) {
+    if (entryIndex === -1) {
       return res.status(404).json({ error: 'Entrada não encontrada ou você não tem permissão' });
     }
 
-    // 5. Verificar se a pessoa existe e pertence ao usuário com Prisma
-    const personExists = await prisma.person.findFirst({
-      where: {
-        id: person,
-        userId: userId,
-      },
-    });
+    // 5. Verificar se a pessoa existe e pertence ao usuário
+    const personExists = db.people.find(p => p.id === person && p.userId === userId);
 
     if (!personExists) {
       return res.status(400).json({ error: 'Pessoa não encontrada' });
     }
 
-    // 6. Atualizar a entrada no banco de dados com Prisma
-    const updatedEntry = await prisma.financeEntry.update({
-      where: {
-        id,
-      },
-      data: {
-        type: type as EntryType,
-        personId: person,
-        date: new Date(date),
-        value: Number(value),
-        description: description.trim(),
-      },
-    });
+    // 6. Atualizar a entrada no array
+    // CORREÇÃO: Usando a propriedade 'person' em vez de 'personId'
+    db.entries[entryIndex] = {
+      ...db.entries[entryIndex], // Manter as propriedades existentes
+      type: type as EntryType,
+      person: person, // A ID da pessoa é atribuída à propriedade 'person'
+      date: new Date(date).toISOString(),
+      value: Number(value),
+      description: description.trim(),
+    };
+    
+    writeDB(db);
 
     res.json({
       message: 'Entrada atualizada com sucesso',
-      entry: updatedEntry
+      entry: db.entries[entryIndex]
     });
   } catch (error) {
-    console.error('Erro ao atualizar entrada:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Erro interno do servidor';
+    console.error('Erro ao atualizar entrada:', errorMessage);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
@@ -163,18 +162,24 @@ router.delete('/:id', async (req: AuthRequest, res) => {
     const { id } = req.params;
     const userId = req.userId!;
 
-    // 7. Deletar a entrada do banco de dados com Prisma
-    // O 'where' com userId garante que apenas o dono pode deletar
-    const deletedEntry = await prisma.financeEntry.delete({
-      where: {
-        id,
-        userId,
-      },
-    });
+    const db = readDB();
+
+    // 7. Encontrar o índice da entrada a ser deletada
+    const entryIndex = db.entries.findIndex(entry => entry.id === id && entry.userId === userId);
+    
+    if (entryIndex === -1) {
+      return res.status(404).json({ error: 'Entrada não encontrada ou você não tem permissão' });
+    }
+
+    // Remover a entrada do array
+    db.entries.splice(entryIndex, 1);
+    
+    writeDB(db);
 
     res.json({ message: 'Entrada deletada com sucesso' });
   } catch (error) {
-    console.error('Erro ao deletar entrada:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Erro interno do servidor';
+    console.error('Erro ao deletar entrada:', errorMessage);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });

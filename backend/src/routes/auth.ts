@@ -1,8 +1,9 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import prisma from '../database'; // Importamos a instância do Prisma
-import { User } from '../types';
+import { v4 as uuidv4 } from 'uuid'; // Adicionado para gerar IDs únicos
+import { readDB, writeDB } from '../database'; // Importação corrigida para as funções do DB de arquivo
+import { Database, User } from '../types';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET!;
@@ -16,10 +17,11 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
 
-    // 1. Verificar se o usuário já existe no banco de dados com Prisma
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
+    // 1. Ler o banco de dados
+    const db = readDB();
+
+    // 2. Verificar se o usuário já existe
+    const existingUser = db.users.find(u => u.email === email);
     
     if (existingUser) {
       return res.status(400).json({ error: 'Email já está em uso' });
@@ -28,16 +30,21 @@ router.post('/register', async (req, res) => {
     // Hash da senha
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 2. Criar o novo usuário no banco de dados com Prisma
-    const newUser = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      },
-    });
+    // 3. Criar o novo usuário com a sintaxe de objeto correta
+    // CORREÇÃO: Adicionada a propriedade 'createdAt' com a data e hora atuais
+    const newUser: User = {
+      id: uuidv4(), // Gerar um novo ID único
+      name,
+      email,
+      password: hashedPassword,
+      createdAt: new Date().toISOString(), // Adicionada a data de criação
+    };
 
-    // 3. Gerar token (lógica mantida)
+    // 4. Adicionar o novo usuário e salvar no banco de dados
+    db.users.push(newUser);
+    writeDB(db);
+
+    // 5. Gerar token
     const token = jwt.sign(
       { userId: newUser.id },
       JWT_SECRET,
@@ -51,7 +58,8 @@ router.post('/register', async (req, res) => {
       token
     });
   } catch (error) {
-    console.error('Erro no registro:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Erro interno do servidor';
+    console.error('Erro no registro:', errorMessage);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
@@ -65,17 +73,18 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email e senha são obrigatórios' });
     }
 
-    // 1. Encontrar o usuário no banco de dados com Prisma
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    // 1. Ler o banco de dados
+    const db = readDB();
 
-    // 2. Verificar se o usuário existe e se a senha está correta
+    // 2. Encontrar o usuário
+    const user = db.users.find(u => u.email === email);
+
+    // 3. Verificar se o usuário existe e se a senha está correta
     if (!user || !await bcrypt.compare(password, user.password)) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
 
-    // 3. Gerar token (lógica mantida)
+    // 4. Gerar token
     const token = jwt.sign(
       { userId: user.id },
       JWT_SECRET,
@@ -89,7 +98,8 @@ router.post('/login', async (req, res) => {
       token
     });
   } catch (error) {
-    console.error('Erro no login:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Erro interno do servidor';
+    console.error('Erro no login:', errorMessage);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
@@ -105,10 +115,11 @@ router.get('/me', async (req, res) => {
 
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
 
-    // 1. Encontrar o usuário no banco de dados com Prisma usando o id do token
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-    });
+    // 1. Ler o banco de dados
+    const db = readDB();
+
+    // 2. Encontrar o usuário
+    const user = db.users.find(u => u.id === decoded.userId);
 
     if (!user) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
@@ -117,7 +128,8 @@ router.get('/me', async (req, res) => {
     const { password: _, ...userWithoutPassword } = user;
     res.json({ user: userWithoutPassword });
   } catch (error) {
-    res.status(401).json({ error: 'Token inválido' });
+    const errorMessage = error instanceof Error ? error.message : 'Token inválido';
+    res.status(401).json({ error: errorMessage });
   }
 });
 
