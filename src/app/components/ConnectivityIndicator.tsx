@@ -3,7 +3,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FaWifi, FaExclamationTriangle, FaCheckCircle, FaTimes } from 'react-icons/fa';
+import { FaExclamationTriangle, FaCheckCircle, FaTimes } from 'react-icons/fa';
 import { apiService } from '../services/api';
 
 export function ConnectivityIndicator() {
