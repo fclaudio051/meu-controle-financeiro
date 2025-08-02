@@ -1,3 +1,5 @@
+// Substitua o conteúdo do arquivo src/app/components/ConnectivityIndicator.tsx por este:
+
 'use client';
 
 import { useEffect, useState } from 'react';

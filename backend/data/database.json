@@ -55,6 +55,16 @@
       "description": "agua",
       "userId": "86eb0326-c7b6-4f63-a5e1-c33f4ab7af94",
       "createdAt": "2025-08-01T02:23:17.606Z"
+    },
+    {
+      "id": "f64f100b-c596-42a7-add0-1fb64e6ea5e8",
+      "type": "receita",
+      "person": "a3e85c17-cf6c-4896-9d3b-38db972a7ebe",
+      "date": "2025-08-02",
+      "value": 50,
+      "description": "sal",
+      "userId": "86eb0326-c7b6-4f63-a5e1-c33f4ab7af94",
+      "createdAt": "2025-08-02T00:08:28.086Z"
     }
   ]
 }

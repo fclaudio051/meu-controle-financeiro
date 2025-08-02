@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { PrismaClient } from '@prisma/client';
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -11,7 +12,7 @@ import peopleRoutes from './routes/people';
 import entriesRoutes from './routes/entries';
 
 const app = express();
-
+const prisma = new PrismaClient();
 const PORT = parseInt(process.env.PORT as string, 10) || 3001;
 const HOST = '0.0.0.0';
 const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';

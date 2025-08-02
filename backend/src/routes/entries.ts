@@ -1,16 +1,32 @@
 import express from 'express';
-import { v4 as uuidv4 } from 'uuid';
-import { readDB, writeDB } from '../database';
+import prisma from '../database'; // Importamos a instância do Prisma
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { FinanceEntry, EntryType } from '../types';
 
 const router = express.Router();
 
+// Aplique o middleware de autenticação a todas as rotas deste arquivo
+router.use(authMiddleware);
+
 // Listar entradas do usuário
-router.get('/', authMiddleware, (req: AuthRequest, res) => {
+router.get('/', async (req: AuthRequest, res) => {
   try {
-    const db = readDB();
-    const userEntries = db.entries.filter(entry => entry.userId === req.userId);
+    const userId = req.userId!;
+
+    // 1. Buscar todas as entradas do usuário usando o Prisma
+    // O 'include' faz um JOIN com a tabela 'Person'
+    const userEntries = await prisma.financeEntry.findMany({
+      where: { userId },
+      include: {
+        personRef: {
+          select: { id: true, name: true } // Selecionamos apenas os campos necessários da pessoa
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
     res.json(userEntries);
   } catch (error) {
     console.error('Erro ao buscar entradas:', error);
@@ -19,51 +35,51 @@ router.get('/', authMiddleware, (req: AuthRequest, res) => {
 });
 
 // Criar entrada
-router.post('/', authMiddleware, (req: AuthRequest, res) => {
+router.post('/', async (req: AuthRequest, res) => {
   try {
     const { type, person, date, value, description } = req.body;
+    const userId = req.userId!;
 
-    // Validações
+    // Validações (lógica mantida)
     if (!type || !person || !date || !value || !description) {
       return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
-
     if (!['receita', 'despesa_fixa', 'despesa_variavel'].includes(type)) {
       return res.status(400).json({ error: 'Tipo de entrada inválido' });
     }
-
     if (isNaN(Number(value)) || Number(value) <= 0) {
       return res.status(400).json({ error: 'Valor deve ser um número positivo' });
     }
-
     if (!description.trim()) {
       return res.status(400).json({ error: 'Descrição é obrigatória' });
     }
 
-    const db = readDB();
-
-    // Verificar se a pessoa existe e pertence ao usuário
-    const personExists = db.people.find(
-      p => p.id === person && p.userId === req.userId
-    );
+    // 2. Verificar se a pessoa existe e pertence ao usuário com Prisma
+    const personExists = await prisma.person.findFirst({
+      where: {
+        id: person,
+        userId: userId,
+      },
+    });
 
     if (!personExists) {
       return res.status(400).json({ error: 'Pessoa não encontrada' });
     }
 
-    const newEntry: FinanceEntry = {
-      id: uuidv4(),
-      type: type as EntryType,
-      person,
-      date,
-      value: Number(value),
-      description: description.trim(),
-      userId: req.userId!,
-      createdAt: new Date().toISOString()
-    };
-
-    db.entries.push(newEntry);
-    writeDB(db);
+    // 3. Criar a nova entrada no banco de dados com Prisma
+    const newEntry = await prisma.financeEntry.create({
+      data: {
+        type: type as EntryType,
+        personId: person, // Conexão com o ID da pessoa
+        date: new Date(date),
+        value: Number(value),
+        description: description.trim(),
+        userId: userId,
+      },
+      include: {
+        personRef: true
+      }
+    });
 
     res.status(201).json({
       message: 'Entrada criada com sucesso',
@@ -76,58 +92,64 @@ router.post('/', authMiddleware, (req: AuthRequest, res) => {
 });
 
 // Atualizar entrada
-router.put('/:id', authMiddleware, (req: AuthRequest, res) => {
+router.put('/:id', async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
     const { type, person, date, value, description } = req.body;
+    const userId = req.userId!;
 
-    // Validações
+    // Validações (lógica mantida)
     if (!type || !person || !date || !value || !description) {
       return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
-
     if (!['receita', 'despesa_fixa', 'despesa_variavel'].includes(type)) {
       return res.status(400).json({ error: 'Tipo de entrada inválido' });
     }
-
     if (isNaN(Number(value)) || Number(value) <= 0) {
       return res.status(400).json({ error: 'Valor deve ser um número positivo' });
     }
 
-    const db = readDB();
+    // 4. Verificar se a entrada existe e pertence ao usuário com Prisma
+    const entryToUpdate = await prisma.financeEntry.findFirst({
+      where: {
+        id: id,
+        userId: userId,
+      },
+    });
 
-    const entryIndex = db.entries.findIndex(
-      entry => entry.id === id && entry.userId === req.userId
-    );
-
-    if (entryIndex === -1) {
-      return res.status(404).json({ error: 'Entrada não encontrada' });
+    if (!entryToUpdate) {
+      return res.status(404).json({ error: 'Entrada não encontrada ou você não tem permissão' });
     }
 
-    // Verificar se a pessoa existe e pertence ao usuário
-    const personExists = db.people.find(
-      p => p.id === person && p.userId === req.userId
-    );
+    // 5. Verificar se a pessoa existe e pertence ao usuário com Prisma
+    const personExists = await prisma.person.findFirst({
+      where: {
+        id: person,
+        userId: userId,
+      },
+    });
 
     if (!personExists) {
       return res.status(400).json({ error: 'Pessoa não encontrada' });
     }
 
-    // Atualizar entrada
-    db.entries[entryIndex] = {
-      ...db.entries[entryIndex],
-      type: type as EntryType,
-      person,
-      date,
-      value: Number(value),
-      description: description.trim()
-    };
-
-    writeDB(db);
+    // 6. Atualizar a entrada no banco de dados com Prisma
+    const updatedEntry = await prisma.financeEntry.update({
+      where: {
+        id,
+      },
+      data: {
+        type: type as EntryType,
+        personId: person,
+        date: new Date(date),
+        value: Number(value),
+        description: description.trim(),
+      },
+    });
 
     res.json({
       message: 'Entrada atualizada com sucesso',
-      entry: db.entries[entryIndex]
+      entry: updatedEntry
     });
   } catch (error) {
     console.error('Erro ao atualizar entrada:', error);
@@ -136,21 +158,19 @@ router.put('/:id', authMiddleware, (req: AuthRequest, res) => {
 });
 
 // Deletar entrada
-router.delete('/:id', authMiddleware, (req: AuthRequest, res) => {
+router.delete('/:id', async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const db = readDB();
+    const userId = req.userId!;
 
-    const entryIndex = db.entries.findIndex(
-      entry => entry.id === id && entry.userId === req.userId
-    );
-
-    if (entryIndex === -1) {
-      return res.status(404).json({ error: 'Entrada não encontrada' });
-    }
-
-    db.entries.splice(entryIndex, 1);
-    writeDB(db);
+    // 7. Deletar a entrada do banco de dados com Prisma
+    // O 'where' com userId garante que apenas o dono pode deletar
+    const deletedEntry = await prisma.financeEntry.delete({
+      where: {
+        id,
+        userId,
+      },
+    });
 
     res.json({ message: 'Entrada deletada com sucesso' });
   } catch (error) {

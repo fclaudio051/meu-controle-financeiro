@@ -1,13 +1,13 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
-import { readDB, writeDB } from '../database';
+import prisma from '../database'; // Importamos a instância do Prisma
 import { User } from '../types';
 
 const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET!;
 
-// Registro
+// Rota de Registro
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -16,10 +16,11 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
 
-    const db = readDB();
+    // 1. Verificar se o usuário já existe no banco de dados com Prisma
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
     
-    // Verificar se usuário já existe
-    const existingUser = db.users.find(user => user.email === email);
     if (existingUser) {
       return res.status(400).json({ error: 'Email já está em uso' });
     }
@@ -27,22 +28,19 @@ router.post('/register', async (req, res) => {
     // Hash da senha
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Criar usuário
-    const newUser: User = {
-      id: uuidv4(),
-      name,
-      email,
-      password: hashedPassword,
-      createdAt: new Date().toISOString()
-    };
+    // 2. Criar o novo usuário no banco de dados com Prisma
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+      },
+    });
 
-    db.users.push(newUser);
-    writeDB(db);
-
-    // Gerar token
+    // 3. Gerar token (lógica mantida)
     const token = jwt.sign(
       { userId: newUser.id },
-      process.env.JWT_SECRET!,
+      JWT_SECRET,
       { expiresIn: '7d' }
     );
 
@@ -58,7 +56,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Login
+// Rota de Login
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -67,17 +65,20 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email e senha são obrigatórios' });
     }
 
-    const db = readDB();
-    const user = db.users.find(user => user.email === email);
+    // 1. Encontrar o usuário no banco de dados com Prisma
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
 
+    // 2. Verificar se o usuário existe e se a senha está correta
     if (!user || !await bcrypt.compare(password, user.password)) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
 
-    // Gerar token
+    // 3. Gerar token (lógica mantida)
     const token = jwt.sign(
       { userId: user.id },
-      process.env.JWT_SECRET!,
+      JWT_SECRET,
       { expiresIn: '7d' }
     );
 
@@ -93,7 +94,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Verificar token
+// Rota para verificar token
 router.get('/me', async (req, res) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -102,9 +103,12 @@ router.get('/me', async (req, res) => {
       return res.status(401).json({ error: 'Token de acesso requerido' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-    const db = readDB();
-    const user = db.users.find(u => u.id === decoded.userId);
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+
+    // 1. Encontrar o usuário no banco de dados com Prisma usando o id do token
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+    });
 
     if (!user) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
