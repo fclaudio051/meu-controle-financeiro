@@ -118,7 +118,7 @@ function FinancialApp() {
         setSyncStatus('error');
         setTimeout(() => setSyncStatus('idle'), 2000);
       }
-    } catch (_error) {
+    } catch {
       setSyncStatus('error');
       setTimeout(() => setSyncStatus('idle'), 2000);
     }
@@ -208,8 +208,8 @@ function FinancialApp() {
       }
 
       checkOfflineMode();
-    } catch (_error) {
-      console.error('Erro ao salvar entrada:', _error);
+    } catch {
+      console.error('Erro ao salvar entrada:');
       alert('Erro ao salvar entrada');
     }
   };
@@ -241,8 +241,8 @@ function FinancialApp() {
       }
 
       checkOfflineMode();
-    } catch (_error) {
-      console.error('Erro ao deletar entrada:', _error);
+    } catch {
+      console.error('Erro ao deletar entrada:');
       alert('Erro ao deletar entrada');
     }
   };
