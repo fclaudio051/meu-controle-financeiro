@@ -118,7 +118,7 @@ function FinancialApp() {
         setSyncStatus('error');
         setTimeout(() => setSyncStatus('idle'), 2000);
       }
-    } catch {
+    } catch  {
       setSyncStatus('error');
       setTimeout(() => setSyncStatus('idle'), 2000);
     }
