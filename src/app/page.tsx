@@ -81,8 +81,8 @@ function FinancialApp() {
           localStorage.setItem('offline_entries', JSON.stringify(entriesData));
         }
       }
-    } catch (_error) {
-      console.error('Erro ao carregar dados:', _error);
+    } catch {
+      console.error('Erro ao carregar dados:',);
       setIsOfflineMode(true);
 
       const localPeople = localStorage.getItem('offline_people');
