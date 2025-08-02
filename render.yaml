@@ -1,35 +1,30 @@
 # Arquivo: render.yaml
+# Atenção à indentação! Cada nível de recuo deve usar 2 espaços.
+
 services:
-  # Serviço do Backend (API)
+  # O hífen '-' indica um item na lista de serviços
   - type: web
     name: meu-controle-financeiro-api
     env: node
-    # Diretório do backend
     rootDir: ./backend
-    # Comandos para construir e rodar o backend
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && npx prisma migrate deploy && npm run build
     startCommand: npm start
-    # Variáveis de ambiente
     envVars:
-      - key: postgresql://meu_controle_financeiro_db_user:v0xmBhB79xKVFnyzAdU4WYXIatnlzgwo@dpg-d26mjumuk2gs73c3m39g-a/meu_controle_financeiro_db # Substitua pela sua URL de banco de dados
+      - key: DATABASE_URL
+        value: postgresql://meu_controle_financeiro_db_user:v0xmBhB79xKVFnyzAdU4WYXIatnlzgwo@dpg-d26mjumuk2gs73c3m39g-a/meu_controle_financeiro_db
         sync: false
-    # Definimos a porta que o Express está ouvindo
+    # O bloco 'ports' deve ter o mesmo recuo que 'envVars'
     ports:
       - port: 3001
         protocol: http
 
-  # Serviço do Frontend (Next.js)
+  # Segundo serviço na lista
   - type: web
     name: meu-controle-financeiro-web
     env: node
-    # Diretório do frontend
     rootDir: .
-    # Comandos para construir e rodar o frontend
     buildCommand: npm install && npm run build
     startCommand: npm start
-    # Variáveis de ambiente
     envVars:
-      # A variável de ambiente que seu frontend usa
-      # O valor será a URL pública do seu serviço de backend na Render
       - key: NEXT_PUBLIC_API_URL
         value: https://meu-controle-financeiro-api.onrender.com
