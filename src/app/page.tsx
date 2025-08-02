@@ -58,7 +58,7 @@ function FinancialApp() {
       ]);
 
       // Verificar se está no modo offline
-      const offline = peopleResponse.isOffline || entriesResponse.isOffline;
+      const offline = !!(peopleResponse.isOffline || entriesResponse.isOffline);
       setIsOfflineMode(offline);
 
       if (peopleResponse.success && peopleResponse.data) {
