@@ -365,7 +365,7 @@ function FinancialApp() {
             </Modal>
 
             <div className="lg:col-span-3">
-              <div className="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/20 mb-8">
+              <div className="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/20 mb-8 text-gray-800">
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent mb-6">Filtros</h2>
                 <div className="flex items-center space-x-6">
                   <div className="flex flex-col gap-2">
