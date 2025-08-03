@@ -52,33 +52,34 @@ export function PersonManagerWithAPI({ people, setPeople }: Props) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta pessoa?')) {
-      return;
-    }
+  if (!confirm('Tem certeza que deseja excluir esta pessoa?')) {
+    return;
+  }
 
-    setLoading(true);
-    try {
-      const response = await apiService.deletePerson(id);
-      
-      if (response.success) {
-        const updatedPeople = people.filter(person => person.id !== id);
-        setPeople(updatedPeople);
-        localStorage.setItem('offline_people', JSON.stringify(updatedPeople));
-      } else {
-        alert(response.error || 'Erro ao deletar pessoa');
-      }
-    } catch (error) {
-      console.error('Erro ao deletar pessoa:', error);
-      
+  setLoading(true);
+  try {
+    const response = await apiService.deletePerson(id);
+    
+    if (response.success) {
       const updatedPeople = people.filter(person => person.id !== id);
       setPeople(updatedPeople);
       localStorage.setItem('offline_people', JSON.stringify(updatedPeople));
-      
-      alert('Pessoa removida offline - será sincronizada quando o servidor estiver disponível');
-    } finally {
-      setLoading(false);
+    } else {
+      if (response.error?.includes('lançamentos vinculados')) {
+        alert('❌ Não é possível excluir essa pessoa porque ela possui lançamentos vinculados. Exclua os lançamentos primeiro.');
+      } else {
+        alert(response.error || 'Erro ao deletar pessoa');
+      }
     }
-  };
+  } catch (error) {
+    console.error('Erro ao deletar pessoa:', error);
+    
+    alert('Erro inesperado ao tentar excluir.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="modal-responsive">
