@@ -18,18 +18,18 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
 
     document.addEventListener('keydown', handleEsc);
     return () => document.removeEventListener('keydown', handleEsc);
-  }, [onClose]);
+  }, [onClose, isOpen]);
 
   if (!isOpen) return null;
 
   return createPortal(
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md transition-all duration-300 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md transition-all duration-300 p-1 sm:p-4"
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 w-full max-w-4xl relative transform transition-all duration-300 animate-in slide-in-from-bottom-4 fade-in-0"
+        className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 w-full max-w-[95vw] sm:max-w-4xl relative transform transition-all duration-300 animate-in slide-in-from-bottom-4 fade-in-0"
       >
         <button
           onClick={onClose}
@@ -37,7 +37,7 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
         >
           <FaTimes size={16} />
         </button>
-        <div className="max-h-[90vh] overflow-y-auto">
+        <div className="max-h-[90vh] overflow-y-auto p-3 sm:p-6">
           {children}
         </div>
       </div>

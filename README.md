@@ -1,170 +1,112 @@
-# 💰 Meu Controle Financeiro
+# 💰 Meu Controle Financeiro##
 
-Sistema completo de controle financeiro pessoal com interface moderna e backend robusto.
+Gerencie suas finanças com estilo, simplicidade e poder!
+Aplicação moderna para controle financeiro pessoal com autenticação, modo offline, relatórios dinâmicos e design responsivo no estilo SaaS Dashboard.
 
-## 🚀 Tecnologias
+## ✅ Funcionalidades Principais
+✔ Autenticação segura (Login/Logout)
+✔ Adicionar, editar e excluir lançamentos financeiros
+✔ Gerenciar pessoas vinculadas aos lançamentos
+✔ Resumo por pessoa com cálculo de receitas e despesas
+✔ Filtros por mês e ano
+✔ Modo Offline com sincronização automática
+✔ Interface Responsiva (Desktop & Mobile)
+✔ UI moderna com gradientes, sombras e animações
 
+## 🖥 Pré-visualização
+(Adicione aqui as screenshots do seu projeto depois do deploy no GitHub Pages ou Vercel)
+
+## 🛠 Tecnologias Utilizadas
 ### Frontend
-- **Next.js 15** - Framework React
-- **TypeScript** - Tipagem estática
-- **Tailwind CSS** - Estilização moderna
-- **React Icons** - Ícones
-- **Glassmorphism** - Design moderno
+Next.js 14+ – Framework React com renderização híbrida
+
+React 18+ – Hooks, Context API e componentização
+
+TailwindCSS – Estilização responsiva e moderna
+
+TypeScript – Segurança e escalabilidade
+
+React Icons – Ícones leves e elegantes
 
 ### Backend
-- **Node.js** - Runtime JavaScript
-- **Express** - Framework web
-- **TypeScript** - Tipagem estática
-- **JWT** - Autenticação
-- **bcryptjs** - Hash de senhas
-- **JSON File Database** - Armazenamento persistente
+Node.js + TypeScript
 
-## 🎨 Features
+Express (ou similar)
 
-### ✨ Interface Moderna
-- Design system com gradientes e glassmorphism
-- Animações suaves e hover effects
-- Layout responsivo
-- Tema consistente em cores (indigo/purple)
+JSON Database simples com persistência em arquivo
 
-### 🔐 Sistema de Autenticação
-- Login/Registro de usuários
-- Proteção de rotas
-- Sessões persistentes
-- Logout seguro
+Outros
+ESLint + Prettier – Padrões de código
 
-### 💸 Gestão Financeira
-- **Receitas, Despesas Fixas e Variáveis**
-- **Validação de valores positivos**
-- **Filtros por mês/ano**
-- **Resumo financeiro com gráficos**
-- **Gerenciamento de pessoas**
+dotenv – Gerenciamento de variáveis de ambiente
 
-### 🛡️ Validações
-- Valores não podem ser negativos
-- Campos obrigatórios
-- Validação de email
-- Senhas seguras
+# 📂 Estrutura do Projeto
 
-## 🚀 Como Executar
+📦 meu-controle-financeiro
+ ┣ 📂 backend
+ ┃ ┣ 📂 data        # Base de dados JSON
+ ┃ ┣ 📂 src
+ ┃ ┃ ┣ 📂 database  # Configuração do banco
+ ┃ ┃ ┣ 📂 middleware# Autenticação
+ ┃ ┃ ┣ 📂 routes    # Endpoints da API
+ ┃ ┃ ┣ 📂 types     # Tipos TypeScript
+ ┃ ┃ ┣ server.ts    # Inicialização do servidor
+ ┣ 📂 src
+ ┃ ┣ 📂 app
+ ┃ ┃ ┣ 📂 components # Componentes React
+ ┃ ┃ ┣ page.tsx      # Página principal
+ ┃ ┃ ┣ layout.tsx    # Layout global
+ ┃ ┣ 📂 contexts     # Context API (Auth)
+ ┃ ┣ 📂 services     # Consumo de API
+ ┃ ┣ 📂 types        # Tipos TypeScript
+ ┃ ┣ 📂 utils        # Funções utilitárias
+ ┣ tailwind.config.js
+ ┣ package.json
+ ┗ README.md
+# 🚀 Como Rodar o Projeto
 
-### 1. Clonar o Repositório
-\`\`\`bash
-git clone [url-do-repo]
+## Pré-requisitos
+Node.js >=18
+
+npm ou yarn instalado
+
+## Instalação
+
+### Clonar o repositório
+git clone https://github.com/fclaudio051/meu-controle-financeiro.git
+
+### Entrar na pasta do projeto
 cd meu-controle-financeiro
-\`\`\`
 
-### 2. Configurar Backend
-\`\`\`bash
+### Instalar dependências
+npm install
+
+## Rodar Backend
 cd backend
 npm install
 npm run dev
-\`\`\`
-O servidor estará rodando em: http://localhost:3001
 
-### 3. Configurar Frontend
-\`\`\`bash
-# Em outro terminal, na raiz do projeto
-npm install
+## Rodar Frontend
 npm run dev
-\`\`\`
-A aplicação estará rodando em: http://localhost:3000
 
-## 🔧 Scripts Disponíveis
+# 🌍 Deploy
+Frontend: Vercel
 
-### Frontend
-- \`npm run dev\` - Executar em modo desenvolvimento
-- \`npm run build\` - Build para produção
-- \`npm run start\` - Executar build de produção
+Backend: Pode ser hospedado no Render ou Railway
 
-### Backend
-- \`npm run dev\` - Executar em modo desenvolvimento
-- \`npm run build\` - Compilar TypeScript
-- \`npm run start\` - Executar versão compilada
+# 📸 Screenshots
+ ![alt text](image-3.png)
+ ![alt text](image.png)
+ ![alt text](image-1.png)
+ ![alt text](image-2.png)
 
-## 📡 API Endpoints
+# 📌 Diferenciais
+✔ UI Clean e Moderna inspirada em dashboards SaaS
+✔ Sincronização Offline para redes instáveis
+✔ Arquitetura escalável separando Frontend e Backend
+✔ TypeScript em todo o projeto
 
-### Autenticação
-- \`POST /api/auth/register\` - Registrar usuário
-- \`POST /api/auth/login\` - Login
-- \`GET /api/auth/me\` - Verificar token
+# 👨‍💻 Autor
+Feito por Cláudio Faustino
 
-### Pessoas
-- \`GET /api/people\` - Listar pessoas
-- \`POST /api/people\` - Criar pessoa
-- \`DELETE /api/people/:id\` - Deletar pessoa
 
-### Entradas Financeiras
-- \`GET /api/entries\` - Listar entradas
-- \`POST /api/entries\` - Criar entrada
-- \`PUT /api/entries/:id\` - Atualizar entrada
-- \`DELETE /api/entries/:id\` - Deletar entrada
-
-## 💾 Banco de Dados
-
-O sistema usa arquivos JSON para persistência:
-- \`backend/data/database.json\` - Dados principais
-- Estrutura: users, people, entries
-- Backup automático em cada operação
-
-## 🔒 Segurança
-
-- Senhas hasheadas com bcrypt
-- JWT para autenticação
-- Middleware de autorização
-- Validação de dados
-- CORS configurado
-
-## 🎨 Design System
-
-### Cores Principais
-- **Gradiente Principal**: Indigo → Purple
-- **Receitas**: Emerald → Teal
-- **Despesas**: Red → Pink
-- **Neutros**: Gray shades
-
-### Componentes
-- Cards com glassmorphism
-- Botões com gradientes
-- Inputs com focus rings
-- Modais modernos
-- Tabelas responsivas
-
-## 📱 Responsividade
-
-- Mobile First
-- Breakpoints: sm, md, lg, xl
-- Grid system flexível
-- Componentes adaptativos
-
-## 🚀 Deploy
-
-### Frontend (Vercel)
-\`\`\`bash
-npm run build
-# Deploy para Vercel
-\`\`\`
-
-### Backend (Railway/Heroku)
-\`\`\`bash
-cd backend
-npm run build
-# Configurar variáveis de ambiente
-# Deploy para plataforma escolhida
-\`\`\`
-
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie uma branch (\`git checkout -b feature/nova-feature\`)
-3. Commit (\`git commit -m 'Adicionar nova feature'\`)
-4. Push (\`git push origin feature/nova-feature\`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT.
-
----
-
-**Desenvolvido com ❤️ e muito ☕**

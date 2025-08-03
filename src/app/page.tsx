@@ -360,6 +360,7 @@ function FinancialApp() {
                 onClose={handleCloseForm}
                 people={people}
                 initialEntry={editingEntry}
+                onOpenPersonManager={() => setShowPersonManager(true)}
               />
             </Modal>
 
