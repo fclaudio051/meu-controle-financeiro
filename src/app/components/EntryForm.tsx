@@ -134,7 +134,7 @@ export function EntryForm({ onAdd, visible, onClose, onOpenPersonManager, people
                 <select
                   value={entry.type}
                   onChange={e => setEntry({ ...entry, type: e.target.value as EntryType })}
-                  className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm text-base appearance-none cursor-pointer hover:border-gray-300"
+                  className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 text-gray-800 backdrop-blur font-medium shadow-sm text-base appearance-none cursor-pointer hover:border-gray-300"
                 >
                   <option value="receita">💰 Receita</option>
                   <option value="despesa_fixa">🔒 Despesa Fixa</option>
@@ -151,15 +151,15 @@ export function EntryForm({ onAdd, visible, onClose, onOpenPersonManager, people
             {/* Pessoa */}
             <div className="sm:col-span-2">
               <label className="block text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
-                <span className="w-2 h-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"></span>
+                <span className="w-2 h-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full "></span>
                 PESSOA
               </label>
 
               {people.length === 0 ? (
-                <div className="p-6 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl shadow-sm">
+                <div className="p-6 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl shadow-sm text-gray-800">
                   <div className="text-center">
                     <div className="text-4xl mb-3">👤</div>
-                    <p className="text-amber-800 font-semibold mb-4">Nenhuma pessoa cadastrada</p>
+                    <p className="text-amber-800 font-semibold mb-4 text-gray-800">Nenhuma pessoa cadastrada</p>
                     <button
                       type="button"
                       onClick={() => {
@@ -206,7 +206,7 @@ export function EntryForm({ onAdd, visible, onClose, onOpenPersonManager, people
                   type="date"
                   value={entry.date}
                   onChange={e => setEntry({ ...entry, date: e.target.value })}
-                  className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm text-base hover:border-gray-300"
+                  className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm text-base hover:border-gray-300 text-gray-800"
                 />
               </div>
             </div>
@@ -231,7 +231,7 @@ export function EntryForm({ onAdd, visible, onClose, onOpenPersonManager, people
                       setEntry({ ...entry, value: numValue });
                     }
                   }}
-                  className="w-full p-4 pl-12 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm text-base hover:border-gray-300"
+                  className="w-full p-4 pl-12 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm text-base hover:border-gray-300 text-gray-800"
                   placeholder="0,00"
                 />
               </div>
@@ -253,7 +253,7 @@ export function EntryForm({ onAdd, visible, onClose, onOpenPersonManager, people
                       const value = e.target.value;
                       setRepeatMonth(value === '' ? 1 : parseInt(value));
                     }}
-                    className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm text-base hover:border-gray-300"
+                    className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm text-base hover:border-gray-300 text-gray-800"
                     placeholder="Ex: 3 meses"
                   />
                 </div>
@@ -271,7 +271,7 @@ export function EntryForm({ onAdd, visible, onClose, onOpenPersonManager, people
                   type="text"
                   value={entry.description}
                   onChange={e => setEntry({ ...entry, description: e.target.value })}
-                  className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm text-base hover:border-gray-300"
+                  className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white/90 backdrop-blur font-medium shadow-sm text-base hover:border-gray-300 text-gray-800"
                   placeholder="📝 Descreva o lançamento..."
                 />
               </div>
