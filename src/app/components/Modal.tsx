@@ -21,7 +21,7 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
   }, [onClose, isOpen]);
 
   if (!isOpen) return null;
-
+ 
   return createPortal(
     <div
       onClick={onClose}
@@ -37,7 +37,7 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
         >
           <FaTimes size={16} />
         </button>
-        <div className="max-h-[90vh] overflow-y-auto p-3 sm:p-6">
+        <div className="max-h-[100vh]">
           {children}
         </div>
       </div>
