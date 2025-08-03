@@ -94,7 +94,7 @@ export function PersonManagerWithAPI({ people, setPeople }: Props) {
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder="👤 Nome da pessoa"
-            className="flex-1 w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all duration-200 bg-white/90 font-medium shadow-sm text-sm sm:text-base"
+            className="flex-1 w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all duration-200 bg-white/90 font-medium shadow-sm text-sm sm:text-base text-gray-800"
             onKeyPress={e => e.key === 'Enter' && !loading && handleAdd()}
             disabled={loading}
           />
