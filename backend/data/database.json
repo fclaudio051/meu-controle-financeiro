@@ -23,12 +23,6 @@
       "createdAt": "2025-08-01T02:22:26.595Z"
     },
     {
-      "id": "be54a932-f532-4927-a020-e133af33bf4a",
-      "name": "amony",
-      "userId": "f6c4580d-974f-4656-9037-410490d84bac",
-      "createdAt": "2025-08-01T02:25:16.752Z"
-    },
-    {
       "id": "21261ebf-a777-4114-924f-6a403668bb3d",
       "name": "faustino",
       "userId": "f6c4580d-974f-4656-9037-410490d84bac",
@@ -36,35 +30,6 @@
     }
   ],
   "entries": [
-    {
-      "id": "a0355cfa-becc-4f92-af8b-f7211aaa99b8",
-      "type": "receita",
-      "person": "a3e85c17-cf6c-4896-9d3b-38db972a7ebe",
-      "date": "2025-08-01",
-      "value": 2000,
-      "description": "salário",
-      "userId": "86eb0326-c7b6-4f63-a5e1-c33f4ab7af94",
-      "createdAt": "2025-08-01T02:22:47.972Z"
-    },
-    {
-      "id": "bb09b150-6348-451a-bbba-29eda89c67ac",
-      "type": "despesa_fixa",
-      "person": "a3e85c17-cf6c-4896-9d3b-38db972a7ebe",
-      "date": "2025-08-01",
-      "value": 52,
-      "description": "agua",
-      "userId": "86eb0326-c7b6-4f63-a5e1-c33f4ab7af94",
-      "createdAt": "2025-08-01T02:23:17.606Z"
-    },
-    {
-      "id": "f64f100b-c596-42a7-add0-1fb64e6ea5e8",
-      "type": "receita",
-      "person": "a3e85c17-cf6c-4896-9d3b-38db972a7ebe",
-      "date": "2025-08-02",
-      "value": 50,
-      "description": "sal",
-      "userId": "86eb0326-c7b6-4f63-a5e1-c33f4ab7af94",
-      "createdAt": "2025-08-02T00:08:28.086Z"
-    }
+
   ]
 }
