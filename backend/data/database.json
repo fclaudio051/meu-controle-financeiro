@@ -1,0 +1,35 @@
+{
+  "users": [
+    {
+      "id": "86eb0326-c7b6-4f63-a5e1-c33f4ab7af94",
+      "name": "CLAUDIO FAUSTINO PEREIRA",
+      "email": "admin@exemplo.com",
+      "password": "$2b$10$BlQK9QmNfz2lc5Onbx7PZuk8wPv0NPWnwnXF0zeoe/aYCa85k2Za6",
+      "createdAt": "2025-08-01T02:22:04.869Z"
+    },
+    {
+      "id": "f6c4580d-974f-4656-9037-410490d84bac",
+      "name": "Amony Faustino",
+      "email": "user@exemplo.com",
+      "password": "$2b$10$r7ciI.F4aX6vT3nDeuWdueO4lHLZd18ps6P7TdjESngB58lJjrWo.",
+      "createdAt": "2025-08-01T02:24:57.834Z"
+    }
+  ],
+  "people": [
+    {
+      "id": "a3e85c17-cf6c-4896-9d3b-38db972a7ebe",
+      "name": "amony",
+      "userId": "86eb0326-c7b6-4f63-a5e1-c33f4ab7af94",
+      "createdAt": "2025-08-01T02:22:26.595Z"
+    },
+    {
+      "id": "21261ebf-a777-4114-924f-6a403668bb3d",
+      "name": "faustino",
+      "userId": "f6c4580d-974f-4656-9037-410490d84bac",
+      "createdAt": "2025-08-01T02:25:21.263Z"
+    }
+  ],
+  "entries": [
+
+  ]
+}

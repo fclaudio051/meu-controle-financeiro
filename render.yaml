@@ -1,0 +1,28 @@
+# Arquivo: render.yaml
+# Atenção à sintaxe! A propriedade 'sync' não pode ser usada junto com 'value'.
+
+services:
+  # Serviço do Backend (API)
+  - type: web
+    name: meu-controle-financeiro-api
+    env: node
+    rootDir: ./backend
+    buildCommand: npm install && npx prisma migrate deploy && npm run build
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://meu_controle_financeiro_db_user:v0xmBhB79xKVFnyzAdU4WYXIatnlzgwo@dpg-d26mjumuk2gs73c3m39g-a/meu_controle_financeiro_db
+    ports:
+      - port: 3001
+        protocol: http
+
+  # Serviço do Frontend (Next.js)
+  - type: web
+    name: meu-controle-financeiro-web
+    env: node
+    rootDir: .
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://meu-controle-financeiro-api.onrender.com
