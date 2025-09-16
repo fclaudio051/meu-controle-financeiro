@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import swaggerJsDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -14,6 +16,28 @@ const app = express();
 const PORT = parseInt(process.env.PORT as string, 10) || 3001;
 const HOST = '0.0.0.0';
 const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
+
+// Configuração do Swagger
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'API MeuProjeto',
+      version: '1.0.0',
+      description: 'Documentação da API do meu projeto em Node + TypeScript',
+    },
+    servers: [
+      { url: `http://localhost:${PORT}`, description: 'Servidor local' }
+    ],
+  },
+  apis: ['./routes/*.ts'], // arquivos de rotas para documentação
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+
+
 
 // Middlewares
 app.use(cors({

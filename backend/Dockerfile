@@ -1,23 +1,10 @@
-# Usa Node.js
-FROM node:20-alpine
-
-# Cria diretório
-WORKDIR /app
-
-# Copia configs primeiro (cache melhor)
-COPY package*.json tsconfig.json ./
-
-# Instala dependências
-RUN npm install
-
-# Copia o resto do código
+FROM node:lts-alpine
+ENV NODE_ENV=production
+WORKDIR /usr/src/app
+COPY ["package.json", "package-lock.json*", "npm-shrinkwrap.json*", "./"]
+RUN npm install --production --silent && mv node_modules ../
 COPY . .
-
-# Compila o TS
-RUN npm run build
-
-# Expõe a porta
-EXPOSE 4000
-
-# Comando inicial
-CMD ["npm", "run", "start"]
+EXPOSE 3000
+RUN chown -R node /usr/src/app
+USER node
+CMD ["npm", "start"]
